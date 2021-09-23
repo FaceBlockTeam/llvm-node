@@ -63,14 +63,17 @@ private:
     static NAN_METHOD(CreateInBoundsGEP);
     static NAN_METHOD(CreateIntCast);
     static NAN_METHOD(CreateInsertValue);
+    static NAN_METHOD(CreateLandingPad);
     static NAN_METHOD(CreateLoad);
     static NAN_METHOD(CreateNeg);
     static NAN_METHOD(CreateNot);
     static NAN_METHOD(CreatePhi);
+    static NAN_METHOD(CreateResume);
     static NAN_METHOD(CreateRet);
     static NAN_METHOD(CreateRetVoid);
     static NAN_METHOD(CreateSelect);
     static NAN_METHOD(CreateStore);
+    static NAN_METHOD(CreateSwitch);
     static NAN_METHOD(GetInsertBlock);
     static NAN_METHOD(SetInsertionPoint);
 

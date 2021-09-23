@@ -146,6 +146,18 @@ declare namespace llvm {
     addDereferenceableAttr(bytes: number): void;
   }
 
+  class LandingPadInst extends Value {
+    // TODO: change the type of insertBefore
+    static create(type: Type, numReservedClauses: number, name?: string, insertBefore?: Value): LandingPadInst;
+    static create(type: Type, numReservedClauses: number, name: string, insertAtEnd: BasicBlock): LandingPadInst;
+
+    getClause(idx: number): Constant;
+  }
+
+  class CatchSwitchInst extends Value {
+    static create(parentPad: Value, unwindDest: BasicBlock, numHandlers: number, name?: string, insertBefore?: Value): CatchSwitchInst;
+  }
+
   class AllocaInst extends Value {
     alignment: number;
     type: PointerType;
