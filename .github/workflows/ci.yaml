@@ -3,6 +3,7 @@ on:
   push:
     branches:
       - master
+      - lch-feature-eh
   pull_request:
   schedule:
     - cron: "0 1 * * *"
@@ -53,6 +54,13 @@ jobs:
 
       - name: Test
         run: yarn test --ci --coverage
+      
+      - name: Publish
+        env:
+          NPM_PUBLISH_TOKEN: ${{ secrets.NPM_PUBLISH_TOKEN }}
+        run: |
+          npm config set //registry.npmjs.org/:_authToken=$NPM_PUBLISH_TOKEN
+          npm publish
 
   llvm-compatibility:
     name: "LLVM ${{ matrix.llvm }}"
@@ -97,3 +105,10 @@ jobs:
 
       - name: Test
         run: yarn test --ci --coverage
+
+      - name: Publish
+        env:
+          NPM_PUBLISH_TOKEN: ${{ secrets.NPM_PUBLISH_TOKEN }}
+        run: |
+          npm config set //registry.npmjs.org/:_authToken=$NPM_PUBLISH_TOKEN
+          npm publish
