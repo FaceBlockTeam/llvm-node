@@ -154,8 +154,43 @@ declare namespace llvm {
     getClause(idx: number): Constant;
   }
 
+  class ResumeInst extends Value {
+    static create(value: Value, insertAtEnd: BasicBlock): ResumeInst;
+  }
+
+  class InvokeInst extends Value {
+    getNormalDest(): BasicBlock;
+    getUnwindDest(): BasicBlock;
+    setNormalDest(b: BasicBlock): void;
+    setUnwindDest(b: BasicBlock): void;
+    getLandingPadInst(): LandingPadInst;
+    getSuccessor(i: number): BasicBlock;
+    setSuccessor(i: number, newSucc: BasicBlock): void;
+    getNumSuccessors(): number;
+  }
   class CatchSwitchInst extends Value {
     static create(parentPad: Value, unwindDest: BasicBlock, numHandlers: number, name?: string, insertBefore?: Value): CatchSwitchInst;
+    addHandler(dest: BasicBlock): void;
+    getNumHandlers(): number;
+    getParentPad(): Value;
+    setParentPad(parentPad: Value): void;
+    hasUnwindDest(): boolean;
+    unwindsToCaller(): boolean;
+    getUnwindDest(): BasicBlock;
+    setUnwindDest(): void;
+  }
+
+  class SwitchInst extends Value {
+    static create(value: Value, defaultDest: BasicBlock, numCases: number, insertAtEnd: BasicBlock): SwitchInst;
+    getCondition(): Value;
+    setCondition(value: Value): void;
+    getDefaultDest(): BasicBlock;
+    setDefaultDest(defaultDest: BasicBlock): void;
+    getNumCases(): number;
+    addCase(onVal: ConstantInt, dest: BasicBlock): void;
+    getNumSuccessors(): number;
+    getSuccessor(idx: number): BasicBlock;
+    setSuccessor(idx: number, newSucc: BasicBlock): void;
   }
 
   class AllocaInst extends Value {
