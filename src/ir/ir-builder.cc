@@ -450,11 +450,11 @@ NAN_METHOD(IRBuilderWrapper::CreateInvoke) {
     auto* value = ValueWrapper::FromValue(info[1])->getValue();
     auto* normalDest = BasicBlockWrapper::FromValue(info[2])->getBasicBlock();
     auto* unwindDest = BasicBlockWrapper::FromValue(info[3])->getBasicBlock();
-    auto values = toVector<v8::Local<v8::Value>>(info[4]);
-    
-    std::vector<llvm::Value*> args;
 
-    for (auto value: values) {
+    std::vector<llvm::Value*> args;
+    auto values = info[4].As<v8::Array>();
+    for (uint32_t i = 0; i < values->Length(); i++) {
+        auto value = Nan::Get(values, i).ToLocalChecked();
         auto *llvmValue = ValueWrapper::FromValue(value)->getValue();
         args.push_back(llvmValue);
     }
