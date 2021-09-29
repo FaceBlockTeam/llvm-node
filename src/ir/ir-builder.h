@@ -63,6 +63,7 @@ private:
     static NAN_METHOD(CreateInBoundsGEP);
     static NAN_METHOD(CreateIntCast);
     static NAN_METHOD(CreateInsertValue);
+    static NAN_METHOD(CreateInvoke);
     static NAN_METHOD(CreateLandingPad);
     static NAN_METHOD(CreateLoad);
     static NAN_METHOD(CreateNeg);

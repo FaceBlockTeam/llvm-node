@@ -1,7 +1,6 @@
 //
 // Created by Micha Reiser on 28.02.17.
 //
-
 #include "ir-builder.h"
 #include "llvm-context.h"
 #include "basic-block.h"
@@ -10,10 +9,12 @@
 #include "phi-node.h"
 #include "alloca-inst.h"
 #include "call-inst.h"
+#include "invoke-inst.h"
 #include "landingpad-inst.h"
 #include "resume-inst.h"
 #include "switch-inst.h"
 #include "../util/array.h"
+#include "../util/string.h"
 #include "function-type.h"
 
 typedef llvm::Value* (*BinaryOpFn)(IRBuilderBaseType* builder, llvm::Value*, llvm::Value*, const llvm::Twine&);
@@ -107,6 +108,7 @@ NAN_MODULE_INIT(IRBuilderWrapper::Init) {
     Nan::SetPrototypeMethod(functionTemplate, "createInBoundsGEP", IRBuilderWrapper::CreateInBoundsGEP);
     Nan::SetPrototypeMethod(functionTemplate, "createIntCast", IRBuilderWrapper::CreateIntCast);
     Nan::SetPrototypeMethod(functionTemplate, "createInsertValue", IRBuilderWrapper::CreateInsertValue);
+    Nan::SetPrototypeMethod(functionTemplate, "createInvoke", IRBuilderWrapper::CreateInvoke);
     Nan::SetPrototypeMethod(functionTemplate, "createICmpEQ", &NANBinaryOperation<ToBinaryOp<&llvm::IRBuilder<>::CreateICmpEQ>>);
     Nan::SetPrototypeMethod(functionTemplate, "createICmpNE", &NANBinaryOperation<&ToBinaryOp<&llvm::IRBuilder<>::CreateICmpNE>>);
     Nan::SetPrototypeMethod(functionTemplate, "createICmpSGE", &NANBinaryOperation<&ToBinaryOp<&llvm::IRBuilder<>::CreateICmpSGE>>);
@@ -429,6 +431,31 @@ NAN_METHOD(IRBuilderWrapper::CreateIntCast) {
 
     auto* casted = IRBuilderWrapper::FromValue(info.Holder())->irBuilder.CreateIntCast(value, type, isSigned, name);
     info.GetReturnValue().Set(ValueWrapper::of(casted));
+}
+
+NAN_METHOD(IRBuilderWrapper::CreateInvoke) {
+    if (info.Length() < 4 || !TypeWrapper::isInstance(info[0]) || !ValueWrapper::isInstance(info[1]) ||
+    !BasicBlockWrapper::isInstance(info[2]) || !BasicBlockWrapper::isInstance(info[3]) ||
+    (info.Length() > 4 && !info[4]->IsArray()) || info.Length() > 6) {
+        return Nan::ThrowTypeError("createInvoke needs to be called with type: FunctionType, callee: Value, normalDest: BasicBlock, unwindDest: BasicBlock, values: Value[], name?: string");
+    }
+
+    std::string name = "";
+
+    if (info.Length() == 6) {
+        name = ToString(info[5]);
+    }
+
+    auto* functionType = FunctionTypeWrapper::FromValue(info[0])->getFunctionType();
+    auto* value = ValueWrapper::FromValue(info[1])->getValue();
+    auto* normalDest = BasicBlockWrapper::FromValue(info[2])->getBasicBlock();
+    auto* unwindDest = BasicBlockWrapper::FromValue(info[3])->getBasicBlock();
+    auto args = toVector<llvm::Value*>(info[4]);
+    auto& irBuilder = IRBuilderWrapper::FromValue(info.Holder())->irBuilder;
+    auto* invokeInst = irBuilder.CreateInvoke(functionType, value, normalDest, unwindDest, args, name);
+
+    info.GetReturnValue().Set(InvokeInstWrapper::of(invokeInst));
+
 }
 
 NAN_METHOD(IRBuilderWrapper::CreateLandingPad) {

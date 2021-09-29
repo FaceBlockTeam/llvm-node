@@ -661,6 +661,8 @@ declare namespace llvm {
 
     createInsertValue(agg: Value, val: Value, idxList: number[], name?: string): Value;
 
+    createInvoke(type: FunctionType, callee: Value, normalDest: BasicBlock, unwindDest: BasicBlock, args: Value[], name?: string): Value;
+
     createIntCast(vlaue: Value, type: Type, isSigned: boolean, name?: string): Value;
 
     createICmpEQ(lhs: Value, rhs: Value, name?: string): Value;
@@ -682,6 +684,8 @@ declare namespace llvm {
     createICmpULE(lhs: Value, rhs: Value, name?: string): Value;
 
     createICmpULT(lhs: Value, rhs: Value, name?: string): Value;
+
+    createLandingPad(type: Type, numClauses: number, name?: string): Value;
 
     createLoad(ptr: Value, name?: string): Value;
 
@@ -705,6 +709,8 @@ declare namespace llvm {
 
     createRet(value: Value): Value;
 
+    createResume(value: Value): Value;
+
     createRetVoid(): Value;
 
     createSelect(condition: Value, trueValue: Value, falseValue: Value, name?: string): Value;
@@ -712,6 +718,8 @@ declare namespace llvm {
     createSDiv(lhs: Value, rhs: Value, name?: string): Value;
 
     createShl(lhs: Value, rhs: Value, name?: string): Value;
+
+    createSwitch(value: Value, dest: BasicBlock, numCases: number): Value;
 
     createSIToFP(value: Value, type: Type, name?: string): Value;
 
