@@ -47,7 +47,7 @@ Nan::Persistent<v8::FunctionTemplate>& ResumeInstWrapper::resumeInstTemplate() {
         v8::Local<v8::FunctionTemplate> localTemplate = Nan::New<v8::FunctionTemplate>(ResumeInstWrapper::New);
         localTemplate->SetClassName(Nan::New("ResumeInst").ToLocalChecked());
         localTemplate->InstanceTemplate()->SetInternalFieldCount(1);
-        localTemplate->Inherit(Nan::New(resumeInstTemplate()));
+        localTemplate->Inherit(Nan::New(valueTemplate()));
 
         Nan::SetPrototypeMethod(localTemplate, "create", ResumeInstWrapper::create);
 

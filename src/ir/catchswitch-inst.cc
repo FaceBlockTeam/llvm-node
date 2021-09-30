@@ -73,7 +73,7 @@ NAN_GETTER(CatchSwitchInstWrapper::unwindsToCaller) {
 NAN_GETTER(CatchSwitchInstWrapper::getUnwindDest) {
     auto* catchSwitchInst = CatchSwitchInstWrapper::FromValue(info.Holder())->getCatchSwitchInst();
     auto* unwindDest = catchSwitchInst->getUnwindDest();
-    info.GetReturnValue().Set(CatchSwitchInstWrapper::of(unwindDest));
+    info.GetReturnValue().Set(BasicBlockWrapper::of(unwindDest));
 }
 
 NAN_SETTER(CatchSwitchInstWrapper::setUnwindDest) {
@@ -127,4 +127,13 @@ Nan::Persistent<v8::FunctionTemplate>& CatchSwitchInstWrapper::catchSwitchInstTe
 
 llvm::CatchSwitchInst* CatchSwitchInstWrapper::getCatchSwitchInst() {
     return static_cast<llvm::CatchSwitchInst*>(getValue());
+}
+
+v8::Local<v8::Object> CatchSwitchInstWrapper::of(llvm::CatchSwitchInst *catchSwitchInst) {
+    auto constructorFunction = Nan::GetFunction(Nan::New(catchSwitchInstTemplate())).ToLocalChecked();
+    v8::Local<v8::Value> argv[1] = { Nan::New<v8::External>(catchSwitchInst) };
+    auto instance = Nan::NewInstance(constructorFunction, 1, argv).ToLocalChecked();
+
+    Nan::EscapableHandleScope escapeScope {};
+    return escapeScope.Escape(instance);
 }

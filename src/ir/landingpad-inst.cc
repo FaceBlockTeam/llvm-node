@@ -96,7 +96,7 @@ Nan::Persistent<v8::FunctionTemplate>& LandingPadInstWrapper::landingPadInstTemp
         v8::Local<v8::FunctionTemplate> localTemplate = Nan::New<v8::FunctionTemplate>(LandingPadInstWrapper::New);
         localTemplate->SetClassName(Nan::New("LandingPadInst").ToLocalChecked());
         localTemplate->InstanceTemplate()->SetInternalFieldCount(1);
-        localTemplate->Inherit(Nan::New(landingPadInstTemplate()));
+        localTemplate->Inherit(Nan::New(valueTemplate()));
 
         Nan::SetMethod(localTemplate, "isCatch", LandingPadInstWrapper::isCatch);
         Nan::SetMethod(localTemplate, "isFilter", LandingPadInstWrapper::isFilter);
@@ -113,4 +113,14 @@ Nan::Persistent<v8::FunctionTemplate>& LandingPadInstWrapper::landingPadInstTemp
 
 llvm::LandingPadInst* LandingPadInstWrapper::getLandingPadInst() {
     return static_cast<llvm::LandingPadInst*>(getValue());
+}
+
+v8::Local<v8::Object> LandingPadInstWrapper::of(llvm::LandingPadInst* landingPadInst) {
+    auto constructorFunction = Nan::GetFunction(Nan::New(landingPadInstTemplate())).ToLocalChecked();
+    v8::Local<v8::Value> args[1] = { Nan::New<v8::External>(landingPadInst)};
+
+    auto instance = Nan::NewInstance(constructorFunction, 1, args).ToLocalChecked();
+
+    Nan::EscapableHandleScope escapableHandleScope {};
+    return escapableHandleScope.Escape(instance);
 }

@@ -8,7 +8,7 @@
 class CatchSwitchInstWrapper: public ValueWrapper, public FromValueMixin<CatchSwitchInstWrapper> {
 public:
     static NAN_MODULE_INIT(Init);
-    static v8::Local<v8::Object> of(llvm::BasicBlock* basicBlock);
+    static v8::Local<v8::Object> of(llvm::CatchSwitchInst* catchSwitchInst);
     static bool isInstance(v8::Local<v8::Value> value);
     using FromValueMixin<CatchSwitchInstWrapper>::FromValue;
     llvm::CatchSwitchInst* getCatchSwitchInst();

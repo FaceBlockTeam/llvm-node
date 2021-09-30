@@ -10,7 +10,19 @@ NAN_MODULE_INIT(InvokeInstWrapper::Init) {
 }
 
 NAN_METHOD(InvokeInstWrapper::New) {
+    if (!info.IsConstructCall()) {
+        return Nan::ThrowTypeError("The constructor of InvokeInst needs to be called with new");
+    }
 
+    if (info.Length() != 1 || !info[0]->IsExternal()) {
+        return Nan::ThrowTypeError("The constructor of InvokeInst needs to be called with InvokeInst: External");
+    }
+
+    auto* value = static_cast<llvm::InvokeInst*>(v8::External::Cast(*info[0])->Value());
+    auto* wrapper = new InvokeInstWrapper { value };
+    wrapper->Wrap(info.This());
+
+    info.GetReturnValue().Set(info.This());
 }
 
 NAN_GETTER(InvokeInstWrapper::getNormalDest) {
@@ -95,9 +107,9 @@ Nan::Persistent<v8::FunctionTemplate>& InvokeInstWrapper::invokeInstTemplate() {
 
     if (functionTemplate.IsEmpty()) {
         v8::Local<v8::FunctionTemplate> localTemplate = Nan::New<v8::FunctionTemplate>(InvokeInstWrapper::New);
-        localTemplate->SetClassName(Nan::New("LandingPadInst").ToLocalChecked());
+        localTemplate->SetClassName(Nan::New("InvokeInst").ToLocalChecked());
         localTemplate->InstanceTemplate()->SetInternalFieldCount(1);
-        localTemplate->Inherit(Nan::New(invokeInstTemplate()));
+        localTemplate->Inherit(Nan::New(valueTemplate()));
 
         Nan::SetMethod(localTemplate, "getSuccessor", InvokeInstWrapper::getSuccessor);
         Nan::SetMethod(localTemplate, "setSuccessor", InvokeInstWrapper::setSuccessor);
