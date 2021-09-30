@@ -52,11 +52,11 @@ NAN_METHOD(BasicBlockWrapper::Create) {
     llvm::Function* parent = nullptr;
     llvm::BasicBlock* insertBefore = nullptr;
 
-    if (info.Length() > 1) {
+    if (info.Length() > 1 && !info[1]->IsUndefined()) {
         name = ToString(Nan::To<v8::String>(info[1]).ToLocalChecked());
     }
 
-    if (info.Length() > 2) {
+    if (info.Length() > 2 && !info[2]->IsUndefined()) {
         parent = FunctionWrapper::FromValue(info[2])->getFunction();
     }
 
