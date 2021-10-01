@@ -719,7 +719,7 @@ declare namespace llvm {
 
     createShl(lhs: Value, rhs: Value, name?: string): Value;
 
-    createSwitch(value: Value, dest: BasicBlock, numCases: number): Value;
+    createSwitch(value: Value, dest: BasicBlock, numCases: number): SwitchInst;
 
     createSIToFP(value: Value, type: Type, name?: string): Value;
 
