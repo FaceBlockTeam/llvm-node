@@ -685,7 +685,7 @@ declare namespace llvm {
 
     createICmpULT(lhs: Value, rhs: Value, name?: string): Value;
 
-    createLandingPad(type: Type, numClauses: number, name?: string): Value;
+    createLandingPad(type: Type, numClauses: number, name?: string): LandingPadInst;
 
     createLoad(ptr: Value, name?: string): Value;
 
