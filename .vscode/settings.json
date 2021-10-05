@@ -37,9 +37,12 @@
     "ostream": "cpp",
     "array": "cpp",
     "utility": "cpp",
-    "cstddef": "cpp"
+    "cstddef": "cpp",
+    "filesystem": "cpp",
+    "ios": "cpp"
   },
   "cmake.configureSettings": {
-    "LLVM_DIR": "/usr/local/Cellar/llvm/11.0.0/lib/cmake/llvm"
-  }
+    "LLVM_DIR": "/usr/local/Cellar/llvm@11/11.1.0_2/lib/cmake/llvm"
+  },
+  "workbench.colorTheme": "Solarized Dark"
 }

@@ -5,7 +5,8 @@
             "includePath": [
                 "${workspaceFolder}/**",
                 "${workspaceFolder}/node_modules/nan",
-                "/usr/local/include/node"
+                "/usr/local/include/node",
+                "/usr/local/Cellar/llvm@11/11.1.0_2/include/llvm"
             ],
             "defines": [],
             "macFrameworkPath": [
