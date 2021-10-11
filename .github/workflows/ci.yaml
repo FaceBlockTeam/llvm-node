@@ -7,7 +7,7 @@ on:
   pull_request:
 jobs:
   node-compatibility:
-    name: "Node ${{ matrix.node }} (LLVM 11)"
+    name: "Node ${{ matrix.node }} (LLVM ${{ matrix.llvm }})"
     runs-on: ubuntu-20.04
     strategy:
       matrix:
