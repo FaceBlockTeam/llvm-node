@@ -5,8 +5,6 @@ on:
       - master
       - lch-feature-eh
   pull_request:
-  schedule:
-    - cron: "0 1 * * *"
 jobs:
   node-compatibility:
     name: "Node ${{ matrix.node }} (LLVM 11)"
@@ -14,6 +12,7 @@ jobs:
     strategy:
       matrix:
         node: [14]
+        llvm: [11, 13]
     steps:
       - name: Check out repository
         uses: actions/checkout@v2
@@ -21,10 +20,10 @@ jobs:
       - name: Install LLVM
         run: |
           wget -O - https://apt.llvm.org/llvm-snapshot.gpg.key|sudo apt-key add -
-          echo "deb http://apt.llvm.org/focal/ llvm-toolchain-focal-11 main" | sudo tee -a /etc/apt/sources.list
+          echo "deb http://apt.llvm.org/focal/ llvm-toolchain-focal-${{ matrix.llvm }} main" | sudo tee -a /etc/apt/sources.list
           sudo apt-get update -qq
-          sudo apt-get install libllvm11 llvm-11 llvm-11-dev
-          npm config set cmake_LLVM_DIR $(llvm-config-11 --cmakedir)
+          sudo apt-get install libllvm${{ matrix.llvm }} llvm-${{ matrix.llvm }} llvm-${{ matrix.llvm }}-dev
+          npm config set cmake_LLVM_DIR $(llvm-config-${{ matrix.llvm }} --cmakedir)
 
       - name: Set-up node
         uses: actions/setup-node@v2
