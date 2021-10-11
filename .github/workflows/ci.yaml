@@ -12,7 +12,7 @@ jobs:
     strategy:
       matrix:
         node: [14]
-        llvm: [13]
+        llvm: [11]
     steps:
       - name: Check out repository
         uses: actions/checkout@v2
