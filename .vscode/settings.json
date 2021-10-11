@@ -39,7 +39,9 @@
     "utility": "cpp",
     "cstddef": "cpp",
     "filesystem": "cpp",
-    "ios": "cpp"
+    "ios": "cpp",
+    "*.tcc": "cpp",
+    "typeinfo": "cpp"
   },
   "cmake.configureSettings": {
     "LLVM_DIR": "/usr/local/Cellar/llvm@11/11.1.0_2/lib/cmake/llvm"

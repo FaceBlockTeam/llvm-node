@@ -287,7 +287,7 @@ declare namespace llvm {
 
   class Function extends Constant {
     static create(functionType: FunctionType, linkageTypes: LinkageTypes, name?: string, module?: Module): Function;
-
+    static lookupIntrinsicID(name: string): Intrinsic.ID;
     callingConv: CallingConv;
     visibility: VisibilityTypes;
     type: PointerType & { elementType: FunctionType };
@@ -736,6 +736,13 @@ declare namespace llvm {
     createZExt(value: Value, destType: Type, name?: string): Value;
 
     getInsertBlock(): BasicBlock | undefined;
+  }
+
+  namespace Intrinsic {
+    type ID = number;
+    function getName(id: ID): string;
+    function getType(context: LLVMContext, id: ID, types?: Type[]): FunctionType;
+    function getDeclaration(module: Module, id: ID, types?: Type[]): Function;
   }
 
   namespace AtomicRMWInst {

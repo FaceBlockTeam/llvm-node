@@ -26,6 +26,7 @@ private:
     // static
     static NAN_METHOD(New);
     static NAN_METHOD(Create);
+    static NAN_METHOD(lookupIntrinsicID);
 
     // instance
     static NAN_METHOD(addAttribute);
