@@ -9,7 +9,7 @@
 #include <nan.h>
 
 NAN_MODULE_INIT(InitIntrinsics) {
-    auto intrinsics = Nan::New<v8::Object>();
+    auto intrinsic = Nan::New<v8::Object>();
     Nan::SetMethod(intrinsic, "getName", getName);
     Nan::SetMethod(intrinsic, "getType", getType);
     Nan::SetMethod(intrinsic, "getDeclaration".ToLocalChecked(), getDeclaration);
