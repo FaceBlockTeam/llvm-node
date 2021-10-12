@@ -106,7 +106,6 @@ NAN_METHOD(FunctionWrapper::lookupIntrinsicID) {
         return Nan::ThrowTypeError("lookupIntrinsicID should be called with name: string");
     }
 
-    auto* function = FunctionWrapper::FromValue(info.Holder())->getFunction();
     std::string name = ToString(info[0]);
     auto id = llvm::Function::lookupIntrinsicID(name);
     info.GetReturnValue().Set(id);
