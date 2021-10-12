@@ -40,7 +40,7 @@ Nan::Persistent<v8::FunctionTemplate> &FunctionWrapper::functionTemplate() {
         v8::Local<v8::FunctionTemplate> valueTemplate = Nan::New(ConstantWrapper::constantTemplate());
 
         localTemplate->SetClassName(Nan::New("Function").ToLocalChecked());
-        localTemplate->InstanceTemplate()->SetInternalFieldCount(10);
+        localTemplate->InstanceTemplate()->SetInternalFieldCount(1);
         localTemplate->Inherit(valueTemplate);
 
         Nan::SetMethod(localTemplate, "create", FunctionWrapper::Create);
@@ -107,7 +107,7 @@ NAN_METHOD(FunctionWrapper::lookupIntrinsicID) {
     }
 
     auto* function = FunctionWrapper::FromValue(info.Holder())->getFunction();
-    std::string name = ToString(Nan::To<v8::String>(info[0]).ToLocalChecked());
+    std::string name = ToString(info[0]);
     auto id = function->lookupIntrinsicID(name);
     info.GetReturnValue().Set(id);
 }
