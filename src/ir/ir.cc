@@ -20,6 +20,7 @@
 #include "pointer-type.h"
 #include "array-type.h"
 #include "integer-type.h"
+#include "intrinsics.h"
 #include "calling-conv.h"
 #include "call-inst.h"
 #include "struct-type.h"
@@ -70,4 +71,5 @@ NAN_MODULE_INIT(InitIR) {
     ValueWrapper::Init(target);
     InitVerifier(target);
     InitVisibilityTypes(target);
+    InitIntrinsics(target);
 }

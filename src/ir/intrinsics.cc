@@ -8,6 +8,15 @@
 #include <llvm/IR/Function.h>
 #include <nan.h>
 
+NAN_MODULE_INIT(InitIntrinsics) {
+    auto intrinsics = Nan::New<v8::Object>();
+    Nan::SetMethod(intrinsics, "getName", getName);
+    Nan::SetMethod(intrinsics, "getType", getType);
+    Nan::SetMethod(intrinsics, "getDeclaration", getDeclaration);
+
+    Nan::Set(target, Nan::New("Intrinsics").ToLocalChecked(), intrinsics);
+}
+
 NAN_METHOD(getName) {
     if (info.Length() != 1) {
         return Nan::ThrowTypeError("getName needs to be called with: id: ID");
