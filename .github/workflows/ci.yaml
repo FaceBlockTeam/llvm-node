@@ -22,7 +22,7 @@ jobs:
           wget -O - https://apt.llvm.org/llvm-snapshot.gpg.key|sudo apt-key add -
           echo "deb http://apt.llvm.org/focal/ llvm-toolchain-focal-${{ matrix.llvm }} main" | sudo tee -a /etc/apt/sources.list
           sudo apt-get update -qq
-          sudo apt-get install libllvm${{ matrix.llvm }} llvm-${{ matrix.llvm }} llvm-${{ matrix.llvm }}-dev
+          sudo apt-get install clang-${{ matrix.llvm }} libclang-${{ matrix.llvm }}-dev llvm-${{ matrix.llvm }} llvm-${{ matrix.llvm }}-dev
           npm config set cmake_LLVM_DIR $(llvm-config-${{ matrix.llvm }} --cmakedir)
 
       - name: Set-up node
