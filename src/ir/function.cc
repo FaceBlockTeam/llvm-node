@@ -40,7 +40,7 @@ Nan::Persistent<v8::FunctionTemplate> &FunctionWrapper::functionTemplate() {
         v8::Local<v8::FunctionTemplate> valueTemplate = Nan::New(ConstantWrapper::constantTemplate());
 
         localTemplate->SetClassName(Nan::New("Function").ToLocalChecked());
-        localTemplate->InstanceTemplate()->SetInternalFieldCount(2);
+        localTemplate->InstanceTemplate()->SetInternalFieldCount(10);
         localTemplate->Inherit(valueTemplate);
 
         Nan::SetMethod(localTemplate, "create", FunctionWrapper::Create);
