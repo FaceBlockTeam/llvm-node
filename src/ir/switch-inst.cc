@@ -5,6 +5,11 @@
 #include "value.h"
 #include "switch-inst.h"
 
+NAN_MODULE_INIT(SwitchInstWrapper::Init) {
+    auto switchInst = Nan::GetFunction(Nan::New(switchInstTemplate())).ToLocalChecked();
+    Nan::Set(target, Nan::New("SwitchInst").ToLocalChecked(), switchInst);
+}
+
 NAN_METHOD(SwitchInstWrapper::New) {
     if (!info.IsConstructCall()) {
         return Nan::ThrowTypeError("Constructor needs to be called with new");

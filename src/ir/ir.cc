@@ -36,6 +36,7 @@
 #include "attribute.h"
 #include "atomic-rmw-inst.h"
 #include "undef-value.h"
+#include "switch-inst.h"
 
 NAN_MODULE_INIT(InitIR) {
     AllocaInstWrapper::Init(target);
@@ -60,6 +61,7 @@ NAN_MODULE_INIT(InitIR) {
     FunctionTypeWrapper::Init(target);
     GlobalVariableWrapper::Init(target);
     IRBuilderWrapper::Init(target);
+    SwitchInstWrapper::Init(target);
     InitLinkageTypes(target);
     ModuleWrapper::Init(target);
     LLVMContextWrapper::Init(target);
