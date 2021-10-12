@@ -134,10 +134,10 @@ Nan::Persistent<v8::FunctionTemplate>& SwitchInstWrapper::switchInstTemplate() {
         localTemplate->Inherit(Nan::New(valueTemplate()));
         localTemplate->InstanceTemplate()->SetInternalFieldCount(1);
 
-        Nan::SetMethod(localTemplate, "addCase", SwitchInstWrapper::addCase);
         Nan::SetMethod(localTemplate, "create", SwitchInstWrapper::create);
-        Nan::SetMethod(localTemplate, "setSuccessor", SwitchInstWrapper::setSuccessor);
-        Nan::SetMethod(localTemplate, "setSuccessor", SwitchInstWrapper::setSuccessor);
+        Nan::SetPrototypeMethod(localTemplate, "addCase", SwitchInstWrapper::addCase);
+        Nan::SetPrototypeMethod(localTemplate, "setSuccessor", SwitchInstWrapper::setSuccessor);
+        Nan::SetPrototypeMethod(localTemplate, "setSuccessor", SwitchInstWrapper::setSuccessor);
         Nan::SetAccessor(localTemplate->InstanceTemplate(), Nan::New("condition").ToLocalChecked(), SwitchInstWrapper::getCondition, SwitchInstWrapper::setCondition);
         Nan::SetAccessor(localTemplate->InstanceTemplate(), Nan::New("defaultDest").ToLocalChecked(), SwitchInstWrapper::getDefaultDest, SwitchInstWrapper::setDefaultDest);
         Nan::SetAccessor(localTemplate->InstanceTemplate(), Nan::New("numCases").ToLocalChecked(), SwitchInstWrapper::getNumCases);
