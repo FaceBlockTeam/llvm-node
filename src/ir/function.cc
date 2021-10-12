@@ -108,7 +108,7 @@ NAN_METHOD(FunctionWrapper::lookupIntrinsicID) {
 
     auto* function = FunctionWrapper::FromValue(info.Holder())->getFunction();
     std::string name = ToString(info[0]);
-    auto id = function->lookupIntrinsicID(name);
+    auto id = llvm::Function::lookupIntrinsicID(name);
     info.GetReturnValue().Set(id);
 }
 
