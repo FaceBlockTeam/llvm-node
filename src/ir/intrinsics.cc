@@ -12,7 +12,7 @@ NAN_MODULE_INIT(InitIntrinsics) {
     auto intrinsic = Nan::New<v8::Object>();
     Nan::SetMethod(intrinsic, "getName", getName);
     Nan::SetMethod(intrinsic, "getType", getType);
-    Nan::SetMethod(intrinsic, "getDeclaration".ToLocalChecked(), getDeclaration);
+    Nan::SetMethod(intrinsic, "getDeclaration", getDeclaration);
 
     Nan::Set(target, Nan::New("Intrinsic").ToLocalChecked(), intrinsic);
 }
