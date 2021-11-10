@@ -2,9 +2,10 @@
 // Created by Micha Reiser on 24.03.17.
 //
 
+#include <llvm/ADT/StringExtras.h>
+
 #include "constant-int.h"
 #include "llvm-context.h"
-#include "StringExtras.h"
 #include "../util/string.h"
 
 NAN_MODULE_INIT(ConstantIntWrapper::Init) {
