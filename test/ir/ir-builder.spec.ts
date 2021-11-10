@@ -35,7 +35,7 @@ describe("IRBuilder", () => {
     const { builder, context } = createBuilderWithBlock();
     const alloca = builder.createAlloca(llvm.Type.getInt32Ty(context));
 
-    const load = builder.createAlignedLoad(alloca, 4, "value");
+    const load = builder.createAlignedLoad(alloca.type.elementType, alloca, 4, "value");
 
     expect(load).toBeInstanceOf(llvm.Value);
     expect(load.name).toEqual("value");
@@ -95,6 +95,7 @@ describe("IRBuilder", () => {
       llvm.AtomicRMWInst.BinOp.Add,
       value,
       llvm.ConstantInt.get(context, 1),
+      4,
       llvm.AtomicOrdering.AcquireRelease
     );
 
