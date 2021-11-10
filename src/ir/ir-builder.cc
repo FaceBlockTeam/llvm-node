@@ -222,7 +222,7 @@ NAN_METHOD(IRBuilderWrapper::CreateAlignedLoad) {
     #endif
     std::string name {};
 
-    if (info.Length() == 3 && !info[3]->IsUndefined()) {
+    if (info.Length() == 4 && !info[3]->IsUndefined()) {
         name = ToString(info[3]);
     }
 
@@ -505,7 +505,7 @@ NAN_METHOD(IRBuilderWrapper::CreateLoad) {
     }
 
     auto* value = ValueWrapper::FromValue(info[0])->getValue();
-    auto* type = value->getType(); // Added from LLVM 13
+    auto* type = value->getType()->getPointerElementType(); // Added from LLVM 13
     std::string name {};
 
     if (info.Length() > 1 && !info[1]->IsUndefined()) {
