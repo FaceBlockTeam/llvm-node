@@ -4,7 +4,6 @@ on:
     branches:
       - master
       - lch-feature-eh
-  pull_request:
 jobs:
   node-compatibility:
     name: "Node ${{ matrix.node }} (LLVM ${{ matrix.llvm }})"
@@ -12,7 +11,7 @@ jobs:
     strategy:
       matrix:
         node: [14]
-        llvm: [11]
+        llvm: [13]
     steps:
       - name: Check out repository
         uses: actions/checkout@v2
