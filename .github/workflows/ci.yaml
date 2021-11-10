@@ -3,7 +3,7 @@ on:
   push:
     branches:
       - master
-      - lch-feature-eh
+      - lch/add-support-llvm-13
 jobs:
   node-compatibility:
     name: "Node ${{ matrix.node }} (LLVM ${{ matrix.llvm }})"
