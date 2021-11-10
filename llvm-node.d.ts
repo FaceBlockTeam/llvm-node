@@ -146,6 +146,53 @@ declare namespace llvm {
     addDereferenceableAttr(bytes: number): void;
   }
 
+  class LandingPadInst extends Value {
+    // TODO: change the type of insertBefore
+    static create(type: Type, numReservedClauses: number, name?: string, insertBefore?: Value): LandingPadInst;
+    static create(type: Type, numReservedClauses: number, name: string, insertAtEnd: BasicBlock): LandingPadInst;
+
+    getClause(idx: number): Constant;
+  }
+
+  class ResumeInst extends Value {
+    static create(value: Value, insertAtEnd: BasicBlock): ResumeInst;
+  }
+
+  class InvokeInst extends Value {
+    getNormalDest(): BasicBlock;
+    getUnwindDest(): BasicBlock;
+    setNormalDest(b: BasicBlock): void;
+    setUnwindDest(b: BasicBlock): void;
+    getLandingPadInst(): LandingPadInst;
+    getSuccessor(i: number): BasicBlock;
+    setSuccessor(i: number, newSucc: BasicBlock): void;
+    getNumSuccessors(): number;
+  }
+  class CatchSwitchInst extends Value {
+    static create(parentPad: Value, unwindDest: BasicBlock, numHandlers: number, name?: string, insertBefore?: Value): CatchSwitchInst;
+    addHandler(dest: BasicBlock): void;
+    getNumHandlers(): number;
+    getParentPad(): Value;
+    setParentPad(parentPad: Value): void;
+    hasUnwindDest(): boolean;
+    unwindsToCaller(): boolean;
+    getUnwindDest(): BasicBlock;
+    setUnwindDest(): void;
+  }
+
+  class SwitchInst extends Value {
+    static create(value: Value, defaultDest: BasicBlock, numCases: number, insertAtEnd: BasicBlock): SwitchInst;
+    getCondition(): Value;
+    setCondition(value: Value): void;
+    getDefaultDest(): BasicBlock;
+    setDefaultDest(defaultDest: BasicBlock): void;
+    getNumCases(): number;
+    addCase(onVal: ConstantInt, dest: BasicBlock): void;
+    getNumSuccessors(): number;
+    getSuccessor(idx: number): BasicBlock;
+    setSuccessor(idx: number, newSucc: BasicBlock): void;
+  }
+
   class AllocaInst extends Value {
     alignment: number;
     type: PointerType;
@@ -240,7 +287,7 @@ declare namespace llvm {
 
   class Function extends Constant {
     static create(functionType: FunctionType, linkageTypes: LinkageTypes, name?: string, module?: Module): Function;
-
+    static lookupIntrinsicID(name: string): Intrinsic.ID;
     callingConv: CallingConv;
     visibility: VisibilityTypes;
     type: PointerType & { elementType: FunctionType };
@@ -614,6 +661,8 @@ declare namespace llvm {
 
     createInsertValue(agg: Value, val: Value, idxList: number[], name?: string): Value;
 
+    createInvoke(type: FunctionType, callee: Value, normalDest: BasicBlock, unwindDest: BasicBlock, args: Value[], name?: string): Value;
+
     createIntCast(vlaue: Value, type: Type, isSigned: boolean, name?: string): Value;
 
     createICmpEQ(lhs: Value, rhs: Value, name?: string): Value;
@@ -635,6 +684,8 @@ declare namespace llvm {
     createICmpULE(lhs: Value, rhs: Value, name?: string): Value;
 
     createICmpULT(lhs: Value, rhs: Value, name?: string): Value;
+
+    createLandingPad(type: Type, numClauses: number, name?: string): LandingPadInst;
 
     createLoad(ptr: Value, name?: string): Value;
 
@@ -658,6 +709,8 @@ declare namespace llvm {
 
     createRet(value: Value): Value;
 
+    createResume(value: Value): Value;
+
     createRetVoid(): Value;
 
     createSelect(condition: Value, trueValue: Value, falseValue: Value, name?: string): Value;
@@ -665,6 +718,8 @@ declare namespace llvm {
     createSDiv(lhs: Value, rhs: Value, name?: string): Value;
 
     createShl(lhs: Value, rhs: Value, name?: string): Value;
+
+    createSwitch(value: Value, dest: BasicBlock, numCases: number): SwitchInst;
 
     createSIToFP(value: Value, type: Type, name?: string): Value;
 
@@ -681,6 +736,13 @@ declare namespace llvm {
     createZExt(value: Value, destType: Type, name?: string): Value;
 
     getInsertBlock(): BasicBlock | undefined;
+  }
+
+  namespace Intrinsic {
+    type ID = number;
+    function getName(id: ID): string;
+    function getType(context: LLVMContext, id: ID, types?: Type[]): FunctionType;
+    function getDeclaration(module: Module, id: ID, types?: Type[]): Function;
   }
 
   namespace AtomicRMWInst {

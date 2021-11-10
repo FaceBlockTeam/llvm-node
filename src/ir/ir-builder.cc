@@ -1,7 +1,6 @@
 //
 // Created by Micha Reiser on 28.02.17.
 //
-
 #include "ir-builder.h"
 #include "llvm-context.h"
 #include "basic-block.h"
@@ -10,7 +9,12 @@
 #include "phi-node.h"
 #include "alloca-inst.h"
 #include "call-inst.h"
+#include "invoke-inst.h"
+#include "landingpad-inst.h"
+#include "resume-inst.h"
+#include "switch-inst.h"
 #include "../util/array.h"
+#include "../util/string.h"
 #include "function-type.h"
 
 typedef llvm::Value* (*BinaryOpFn)(IRBuilderBaseType* builder, llvm::Value*, llvm::Value*, const llvm::Twine&);
@@ -104,6 +108,7 @@ NAN_MODULE_INIT(IRBuilderWrapper::Init) {
     Nan::SetPrototypeMethod(functionTemplate, "createInBoundsGEP", IRBuilderWrapper::CreateInBoundsGEP);
     Nan::SetPrototypeMethod(functionTemplate, "createIntCast", IRBuilderWrapper::CreateIntCast);
     Nan::SetPrototypeMethod(functionTemplate, "createInsertValue", IRBuilderWrapper::CreateInsertValue);
+    Nan::SetPrototypeMethod(functionTemplate, "createInvoke", IRBuilderWrapper::CreateInvoke);
     Nan::SetPrototypeMethod(functionTemplate, "createICmpEQ", &NANBinaryOperation<ToBinaryOp<&llvm::IRBuilder<>::CreateICmpEQ>>);
     Nan::SetPrototypeMethod(functionTemplate, "createICmpNE", &NANBinaryOperation<&ToBinaryOp<&llvm::IRBuilder<>::CreateICmpNE>>);
     Nan::SetPrototypeMethod(functionTemplate, "createICmpSGE", &NANBinaryOperation<&ToBinaryOp<&llvm::IRBuilder<>::CreateICmpSGE>>);
@@ -114,6 +119,7 @@ NAN_MODULE_INIT(IRBuilderWrapper::Init) {
     Nan::SetPrototypeMethod(functionTemplate, "createICmpUGT", &NANBinaryOperation<&ToBinaryOp<&llvm::IRBuilder<>::CreateICmpUGT>>);
     Nan::SetPrototypeMethod(functionTemplate, "createICmpULT", &NANBinaryOperation<&ToBinaryOp<&llvm::IRBuilder<>::CreateICmpULT>>);
     Nan::SetPrototypeMethod(functionTemplate, "createICmpULE", &NANBinaryOperation<&ToBinaryOp<&llvm::IRBuilder<>::CreateICmpULE>>);
+    Nan::SetPrototypeMethod(functionTemplate, "createLandingPad", IRBuilderWrapper::CreateLandingPad);
     Nan::SetPrototypeMethod(functionTemplate, "createLoad", IRBuilderWrapper::CreateLoad);
     Nan::SetPrototypeMethod(functionTemplate, "createLShr", &NANBinaryOperation<&ToBinaryOp<&llvm::IRBuilder<>::CreateLShr>>);
     Nan::SetPrototypeMethod(functionTemplate, "createMul", &NANBinaryOperation<&ToBinaryOp<&llvm::IRBuilder<>::CreateMul>>);
@@ -124,6 +130,7 @@ NAN_MODULE_INIT(IRBuilderWrapper::Init) {
     Nan::SetPrototypeMethod(functionTemplate, "createPhi", IRBuilderWrapper::CreatePhi);
     Nan::SetPrototypeMethod(functionTemplate, "createPtrToInt", IRBuilderWrapper::ConvertOperation<&llvm::IRBuilder<>::CreatePtrToInt>);
     Nan::SetPrototypeMethod(functionTemplate, "createIntToPtr", IRBuilderWrapper::ConvertOperation<&llvm::IRBuilder<>::CreateIntToPtr>);
+    Nan::SetPrototypeMethod(functionTemplate, "createResume", IRBuilderWrapper::CreateResume);
     Nan::SetPrototypeMethod(functionTemplate, "createRet", IRBuilderWrapper::CreateRet);
     Nan::SetPrototypeMethod(functionTemplate, "createRetVoid", IRBuilderWrapper::CreateRetVoid);
     Nan::SetPrototypeMethod(functionTemplate, "createSDiv", &NANBinaryOperation<&ToBinaryOp<&llvm::IRBuilder<>::CreateSDiv>>);
@@ -131,6 +138,7 @@ NAN_MODULE_INIT(IRBuilderWrapper::Init) {
     Nan::SetPrototypeMethod(functionTemplate, "createShl", &NANBinaryOperation<&ToBinaryOp<&llvm::IRBuilder<>::CreateShl>>);
     Nan::SetPrototypeMethod(functionTemplate, "createSub", &NANBinaryOperation<&ToBinaryOp<&llvm::IRBuilder<>::CreateSub>>);
     Nan::SetPrototypeMethod(functionTemplate, "createSRem", &NANBinaryOperation<&ToBinaryOp<&llvm::IRBuilder<>::CreateSRem>>);
+    Nan::SetPrototypeMethod(functionTemplate, "createSwitch", IRBuilderWrapper::CreateSwitch);
     Nan::SetPrototypeMethod(functionTemplate, "CreateURem", &NANBinaryOperation<&ToBinaryOp<&llvm::IRBuilder<>::CreateURem>>);
     Nan::SetPrototypeMethod(functionTemplate, "createSIToFP", &IRBuilderWrapper::ConvertOperation<&llvm::IRBuilder<>::CreateSIToFP>);
     Nan::SetPrototypeMethod(functionTemplate, "createUIToFP", &IRBuilderWrapper::ConvertOperation<&llvm::IRBuilder<>::CreateUIToFP>);
@@ -425,6 +433,65 @@ NAN_METHOD(IRBuilderWrapper::CreateIntCast) {
     info.GetReturnValue().Set(ValueWrapper::of(casted));
 }
 
+NAN_METHOD(IRBuilderWrapper::CreateInvoke) {
+    if (info.Length() < 4 || !TypeWrapper::isInstance(info[0]) || !ValueWrapper::isInstance(info[1]) ||
+    !BasicBlockWrapper::isInstance(info[2]) || !BasicBlockWrapper::isInstance(info[3]) ||
+    (info.Length() > 4 && !info[4]->IsArray()) || info.Length() > 6) {
+        return Nan::ThrowTypeError("createInvoke needs to be called with type: FunctionType, callee: Value, normalDest: BasicBlock, unwindDest: BasicBlock, values: Value[], name?: string");
+    }
+
+    std::string name = "";
+
+    if (info.Length() == 6) {
+        name = ToString(info[5]);
+    }
+
+    auto* functionType = FunctionTypeWrapper::FromValue(info[0])->getFunctionType();
+    auto* value = ValueWrapper::FromValue(info[1])->getValue();
+    auto* normalDest = BasicBlockWrapper::FromValue(info[2])->getBasicBlock();
+    auto* unwindDest = BasicBlockWrapper::FromValue(info[3])->getBasicBlock();
+
+    std::vector<llvm::Value*> args;
+    auto values = info[4].As<v8::Array>();
+    for (uint32_t i = 0; i < values->Length(); i++) {
+        auto value = Nan::Get(values, i).ToLocalChecked();
+        auto *llvmValue = ValueWrapper::FromValue(value)->getValue();
+        args.push_back(llvmValue);
+    }
+
+    auto& irBuilder = IRBuilderWrapper::FromValue(info.Holder())->irBuilder;
+    auto* invokeInst = irBuilder.CreateInvoke(functionType, value, normalDest, unwindDest, args, name);
+
+    info.GetReturnValue().Set(InvokeInstWrapper::of(invokeInst));
+
+}
+
+NAN_METHOD(IRBuilderWrapper::CreateLandingPad) {
+    if (info.Length() < 2 || !TypeWrapper::isInstance(info[0])
+            || (info.Length() > 1 && !info[1]->IsNumber() && !info[1]->IsUndefined())
+            || (info.Length() > 2 && !info[2]->IsString() && !info[2]->IsUndefined())
+            || info.Length() > 3) {
+        return Nan::ThrowTypeError("createLandingPad needs to be called with: type: Type, numClauses: number, name?: string");
+    }
+
+    auto* type = TypeWrapper::FromValue(info[0])->getType();
+    uint32_t numClauses = 0;
+    std::string name {};
+
+    if (info.Length() > 1 && !info[1]->IsUndefined()) {
+        numClauses = Nan::To<uint32_t>(info[1]).FromJust();
+    }
+
+    if (info.Length() > 2 && !info[2]->IsUndefined()) {
+        name = ToString(Nan::To<v8::String>(info[2]).ToLocalChecked());
+    }
+
+    auto& irBuilder = IRBuilderWrapper::FromValue(info.Holder())->irBuilder;
+    auto* landingPad = irBuilder.CreateLandingPad(type, numClauses, name);
+
+    info.GetReturnValue().Set(LandingPadInstWrapper::of(landingPad));
+}
+
 NAN_METHOD(IRBuilderWrapper::CreateLoad) {
     if (info.Length() < 1 || !ValueWrapper::isInstance(info[0])
             || (info.Length() > 1 && !(info[1]->IsString() || info[1]->IsUndefined()))
@@ -625,6 +692,17 @@ NAN_METHOD(IRBuilderWrapper::CreatePhi) {
     info.GetReturnValue().Set(PhiNodeWrapper::of(phi));
 }
 
+NAN_METHOD(IRBuilderWrapper::CreateResume) {
+    if (info.Length() != 1 || !ValueWrapper::isInstance(info[0])) {
+        return Nan::ThrowTypeError("createResume needs to be called with value: Value");
+    }
+
+    auto* value = ValueWrapper::FromValue(info[0])->getValue();
+    auto& builder = IRBuilderWrapper::FromValue(info.Holder())->irBuilder;
+    auto* resumeInst = builder.CreateResume(value);
+    info.GetReturnValue().Set(ResumeInstWrapper::of(resumeInst));
+}
+
 NAN_METHOD(IRBuilderWrapper::CreateRet) {
     if (info.Length() != 1 || !ValueWrapper::isInstance(info[0])) {
         return Nan::ThrowTypeError("createRet needs to be called with: value: Value");
@@ -661,6 +739,26 @@ NAN_METHOD(IRBuilderWrapper::CreateSelect) {
     }
 
     info.GetReturnValue().Set(ValueWrapper::of(builder.CreateSelect(condition, trueValue, falseValue, name)));
+}
+
+NAN_METHOD(IRBuilderWrapper::CreateSwitch) {
+    if (info.Length() < 2 || !ValueWrapper::isInstance(info[0]) || !BasicBlockWrapper::isInstance(info[1]) ||
+        (info.Length() > 2 && !info[2]->IsUint32()) ||
+        info.Length() > 5) {
+        return Nan::ThrowTypeError("createSwitch needs to be called with: value: Value, dest: BasicBlock, numCases: number");
+    }
+
+    auto* value = ValueWrapper::FromValue(info[0])->getValue();
+    auto* basicBlock = BasicBlockWrapper::FromValue(info[1])->getBasicBlock();
+    
+    uint32_t numCases = 10;
+
+    if (info.Length() > 2) numCases = Nan::To<uint32_t>(info[2]).FromJust();
+
+    auto* builder = IRBuilderWrapper::FromValue(info.Holder());
+    auto* switchInst = builder->irBuilder.CreateSwitch(value, basicBlock, numCases);
+
+    info.GetReturnValue().Set(SwitchInstWrapper::of(switchInst));
 }
 
 NAN_METHOD(IRBuilderWrapper::GetInsertBlock) {

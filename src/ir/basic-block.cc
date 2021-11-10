@@ -40,8 +40,8 @@ NAN_METHOD(BasicBlockWrapper::New) {
 
 NAN_METHOD(BasicBlockWrapper::Create) {
     if (info.Length() < 1 || !LLVMContextWrapper::isInstance(info[0])
-        || (info.Length() > 1 && !info[1]->IsString())
-        || (info.Length() > 2 && !FunctionWrapper::isInstance(info[2]))
+        || (info.Length() > 1 && !info[1]->IsUndefined() && !info[1]->IsString())
+        || (info.Length() > 2 && !info[2]->IsUndefined() && !FunctionWrapper::isInstance(info[2]))
         || (info.Length() > 3 && !BasicBlockWrapper::isInstance(info[3]))
         || info.Length() > 4) {
         return Nan::ThrowTypeError("BasicBlock.create needs to be called with: context: LLVMContext, name: string?, parent: Function?, insertBefore: BasicBlock?");
@@ -52,11 +52,11 @@ NAN_METHOD(BasicBlockWrapper::Create) {
     llvm::Function* parent = nullptr;
     llvm::BasicBlock* insertBefore = nullptr;
 
-    if (info.Length() > 1) {
+    if (info.Length() > 1 && !info[1]->IsUndefined()) {
         name = ToString(Nan::To<v8::String>(info[1]).ToLocalChecked());
     }
 
-    if (info.Length() > 2) {
+    if (info.Length() > 2 && !info[2]->IsUndefined()) {
         parent = FunctionWrapper::FromValue(info[2])->getFunction();
     }
 

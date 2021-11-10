@@ -20,6 +20,7 @@
 #include "pointer-type.h"
 #include "array-type.h"
 #include "integer-type.h"
+#include "intrinsics.h"
 #include "calling-conv.h"
 #include "call-inst.h"
 #include "struct-type.h"
@@ -35,6 +36,7 @@
 #include "attribute.h"
 #include "atomic-rmw-inst.h"
 #include "undef-value.h"
+#include "switch-inst.h"
 
 NAN_MODULE_INIT(InitIR) {
     AllocaInstWrapper::Init(target);
@@ -59,6 +61,7 @@ NAN_MODULE_INIT(InitIR) {
     FunctionTypeWrapper::Init(target);
     GlobalVariableWrapper::Init(target);
     IRBuilderWrapper::Init(target);
+    SwitchInstWrapper::Init(target);
     InitLinkageTypes(target);
     ModuleWrapper::Init(target);
     LLVMContextWrapper::Init(target);
@@ -70,4 +73,5 @@ NAN_MODULE_INIT(InitIR) {
     ValueWrapper::Init(target);
     InitVerifier(target);
     InitVisibilityTypes(target);
+    InitIntrinsics(target);
 }

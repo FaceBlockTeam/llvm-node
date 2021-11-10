@@ -44,6 +44,7 @@ Nan::Persistent<v8::FunctionTemplate> &FunctionWrapper::functionTemplate() {
         localTemplate->Inherit(valueTemplate);
 
         Nan::SetMethod(localTemplate, "create", FunctionWrapper::Create);
+        Nan::SetMethod(localTemplate, "lookupIntrinsicID", FunctionWrapper::lookupIntrinsicID);
         Nan::SetPrototypeMethod(localTemplate, "addAttribute", FunctionWrapper::addAttribute);
         Nan::SetPrototypeMethod(localTemplate, "addBasicBlock", FunctionWrapper::addBasicBlock);
         Nan::SetPrototypeMethod(localTemplate, "addDereferenceableAttr", FunctionWrapper::addDereferenceableAttr);
@@ -98,6 +99,16 @@ NAN_METHOD(FunctionWrapper::Create) {
     auto* function = llvm::Function::Create(functionType, linkageType, name, module);
     auto wrapper = of(function);
     info.GetReturnValue().Set(wrapper);
+}
+
+NAN_METHOD(FunctionWrapper::lookupIntrinsicID) {
+    if (info.Length() != 1 || !info[0]->IsString()) {
+        return Nan::ThrowTypeError("lookupIntrinsicID should be called with name: string");
+    }
+
+    std::string name = ToString(info[0]);
+    auto id = llvm::Function::lookupIntrinsicID(name);
+    info.GetReturnValue().Set(id);
 }
 
 NAN_METHOD(FunctionWrapper::addBasicBlock) {
