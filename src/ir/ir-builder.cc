@@ -205,26 +205,28 @@ NAN_METHOD(IRBuilderWrapper::ConvertOperation) {
 }
 
 NAN_METHOD(IRBuilderWrapper::CreateAlignedLoad) {
-    if (info.Length() < 2 || !ValueWrapper::isInstance(info[0]) || !info[1]->IsUint32() ||
-            (info.Length() == 3 && !info[2]->IsString() && !info[2]->IsUndefined()) ||
-            info.Length() > 3) {
+    if (info.Length() < 3 || !TypeWrapper::isInstance(info[0]) || !ValueWrapper::isInstance(info[1]) || !info[2]->IsUint32() ||
+            (info.Length() == 4 && !info[3]->IsString() && !info[3]->IsUndefined()) ||
+            info.Length() > 4) {
         return Nan::ThrowTypeError("createAlignedLoad needs to be called with: ptr: Value, alignment: uint32, name?: string");
     }
 
-    auto* ptr = ValueWrapper::FromValue(info[0])->getValue();
+    auto* type = TypeWrapper::FromValue(info[0])->getType();
+
+    auto* ptr = ValueWrapper::FromValue(info[1])->getValue();
     
     #if LLVM_VERSION_MAJOR < 11 
-        auto alignment = Nan::To<uint32_t>(info[1]).FromJust();
+        auto alignment = Nan::To<uint32_t>(info[2]).FromJust();
     #else
-        auto alignment = llvm::MaybeAlign(Nan::To<uint32_t>(info[1]).FromJust());
+        auto alignment = llvm::MaybeAlign(Nan::To<uint32_t>(info[2]).FromJust());
     #endif
     std::string name {};
 
-    if (info.Length() == 3 && !info[2]->IsUndefined()) {
-        name = ToString(info[2]);
+    if (info.Length() == 4 && !info[3]->IsUndefined()) {
+        name = ToString(info[3]);
     }
 
-    auto* load = IRBuilderWrapper::FromValue(info.Holder())->irBuilder.CreateAlignedLoad(ptr, alignment, name);
+    auto* load = IRBuilderWrapper::FromValue(info.Holder())->irBuilder.CreateAlignedLoad(type, ptr, alignment, name);
     info.GetReturnValue().Set(ValueWrapper::of(load));
 }
 
@@ -278,11 +280,12 @@ NAN_METHOD(IRBuilderWrapper::CreateAlloca) {
 }
 
 NAN_METHOD(IRBuilderWrapper::CreateAtomicRMW) {
-    if (info.Length() < 4 || !info[0]->IsUint32()
+    if (info.Length() < 5 || !info[0]->IsUint32()
             || !ValueWrapper::isInstance(info[1])
             || !ValueWrapper::isInstance(info[2])
-            || !info[3]->IsUint32()) {
-        return Nan::ThrowTypeError("createAtomicRMW needs to be called with: op: AtomicRMWInst.BinOp, ptr: Value, value: Value, ordering: AtomicOrdering");
+            || !info[3]->IsUint32()
+            || !info[4]->IsUint32()) {
+        return Nan::ThrowTypeError("createAtomicRMW needs to be called with: op: AtomicRMWInst.BinOp, ptr: Value, value: Value, align: MaybeAlign, ordering: AtomicOrdering");
     }
 
     auto& irBuilder = IRBuilderWrapper::FromValue(info.This())->getIRBuilder();
@@ -290,9 +293,10 @@ NAN_METHOD(IRBuilderWrapper::CreateAtomicRMW) {
     auto op = static_cast<llvm::AtomicRMWInst::BinOp>(Nan::To<uint32_t>(info[0]).FromJust());
     llvm::Value *ptr = ValueWrapper::FromValue(info[1])->getValue();
     llvm::Value *value = ValueWrapper::FromValue(info[2])->getValue();
-    auto ordering = static_cast<llvm::AtomicOrdering>(Nan::To<uint32_t>(info[3]).FromJust());
+    auto align = static_cast<uint64_t>(Nan::To<uint32_t>(info[3]).FromJust());
+    auto ordering = static_cast<llvm::AtomicOrdering>(Nan::To<uint32_t>(info[4]).FromJust());
 
-    auto *instruction = irBuilder.CreateAtomicRMW(op, ptr, value, ordering);
+    auto *instruction = irBuilder.CreateAtomicRMW(op, ptr, value, llvm::MaybeAlign(align), ordering);
 
     info.GetReturnValue().Set(ValueWrapper::of(instruction));
 }
@@ -369,6 +373,7 @@ Nan::NAN_METHOD_RETURN_TYPE IRBuilderWrapper::CreateInBoundsGEPWithoutType(Nan::
     }
 
     auto* ptr = ValueWrapper::FromValue(info[0])->getValue();
+    auto* type = ptr->getType()->getPointerElementType(); // Added from LLVM 13
     auto indexValues = v8::Array::Cast(*info[1]);
     std::vector<llvm::Value*> idxList { indexValues->Length() };
 
@@ -388,7 +393,7 @@ Nan::NAN_METHOD_RETURN_TYPE IRBuilderWrapper::CreateInBoundsGEPWithoutType(Nan::
         name = ToString(info[2]);
     }
 
-    auto* grep = IRBuilderWrapper::FromValue(info.Holder())->irBuilder.CreateInBoundsGEP(ptr, idxList, name);
+    auto* grep = IRBuilderWrapper::FromValue(info.Holder())->irBuilder.CreateInBoundsGEP(type, ptr, idxList, name); // Added type from LLVM 13
     info.GetReturnValue().Set(ValueWrapper::of(grep));
 }
 
@@ -500,6 +505,7 @@ NAN_METHOD(IRBuilderWrapper::CreateLoad) {
     }
 
     auto* value = ValueWrapper::FromValue(info[0])->getValue();
+    auto* type = value->getType()->getPointerElementType(); // Added from LLVM 13
     std::string name {};
 
     if (info.Length() > 1 && !info[1]->IsUndefined()) {
@@ -507,7 +513,7 @@ NAN_METHOD(IRBuilderWrapper::CreateLoad) {
     }
 
     auto& irBuilder = IRBuilderWrapper::FromValue(info.Holder())->irBuilder;
-    auto* inst = irBuilder.CreateLoad(value, name);
+    auto* inst = irBuilder.CreateLoad(type, value, name); // Added type from LLVM 13
     info.GetReturnValue().Set(ValueWrapper::of(inst));
 }
 

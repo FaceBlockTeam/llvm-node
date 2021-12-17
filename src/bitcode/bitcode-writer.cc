@@ -21,7 +21,7 @@ NAN_METHOD(WriteBitcodeToFile) {
     auto fileName = ToString(Nan::To<v8::String>(info[1]).ToLocalChecked());
 
     std::error_code errorCode {};
-    llvm::raw_fd_ostream byteCodeFile { fileName, errorCode, llvm::sys::fs::F_None };
+    llvm::raw_fd_ostream byteCodeFile { fileName, errorCode, llvm::sys::fs::OF_None };
 
     if (errorCode) {
         std::string messagePrefix { "Failed to open file: " };

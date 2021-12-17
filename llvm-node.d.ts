@@ -589,7 +589,7 @@ declare namespace llvm {
 
     createAlloca(type: Type, arraySize?: Value, name?: string): AllocaInst;
 
-    createAlignedLoad(ptr: Value, align: number, name?: string): Value;
+    createAlignedLoad(type: Type, ptr: Value, align: number, name?: string): Value;
 
     createAlignedStore(value: Value, ptr: Value, align: number, isVolatile?: boolean): Value;
 
@@ -597,7 +597,7 @@ declare namespace llvm {
 
     createAShr(lhs: Value, rhs: Value, name?: string): Value;
 
-    createAtomicRMW(op: AtomicRMWInst.BinOp, ptr: Value, value: Value, ordering: AtomicOrdering): Value;
+    createAtomicRMW(op: AtomicRMWInst.BinOp, ptr: Value, value: Value, align: number, ordering: AtomicOrdering): Value;
 
     createBitCast(value: Value, destType: Type, name?: string): Value;
 

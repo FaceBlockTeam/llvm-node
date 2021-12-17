@@ -2,6 +2,8 @@
 // Created by Micha Reiser on 24.03.17.
 //
 
+#include <llvm/ADT/StringExtras.h>
+
 #include "constant-int.h"
 #include "llvm-context.h"
 #include "../util/string.h"
@@ -86,8 +88,8 @@ NAN_METHOD(ConstantIntWrapper::toString) {
     auto* wrapper = ConstantIntWrapper::FromValue(info.Holder());
     auto constantInt = wrapper->getConstantInt();
     auto value = constantInt->getValue();
-
-    info.GetReturnValue().Set(Nan::New<v8::String>(value.toString(10, true)).ToLocalChecked());
+    auto str = llvm::toString(value, 10, true);
+    info.GetReturnValue().Set(Nan::New<v8::String>(str).ToLocalChecked());
 }
 
 NAN_GETTER(ConstantIntWrapper::getValueApf) {
