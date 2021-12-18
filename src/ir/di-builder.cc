@@ -2,9 +2,12 @@
 #include "di-builder.h"
 #include "util/string.h"
 #include "util/array.h"
+#include "di-compile-unit.h"
+#include "di-file.h"
 
 NAN_MODULE_INIT(DIBuilderWrapper::Init) {
-
+    auto diBuilder = Nan::GetFunction(Nan::New(diBuilderTemplate())).ToLocalChecked();
+    Nan::Set(target, Nan::New("DIBuilder").ToLocalChecked(), diBuilder);
 }
 
 llvm::DIBuilder &DIBuilderWrapper::getDIBuilder() {
@@ -33,7 +36,24 @@ NAN_METHOD(DIBuilderWrapper::finalizeSubprogram) {
 }
 
 NAN_METHOD(DIBuilderWrapper::createCompileUnit) {
+    // For now, this function receives only required arguments.
+    if (info.Length() != 6 || !info[0]->IsUint32() || !DIFileWrapper::isInstance(info[1])
+        || !info[2]->IsString() || !info[3]->IsBoolean() || !info[4]->IsString()
+        || !info[5]->IsUint32()) {
+            return Nan::ThrowTypeError("createCompileUnit should be called exactly with 6 arguments");
+    }
 
+    uint32_t lang = Nan::To<uint32_t>(info[0]).FromJust();
+    auto *diFile = DIFileWrapper::FromValue(info[1])->getDIFile();
+    std::string producer = ToString(info[2]);
+    bool isOptimized = Nan::To<bool>(info[3]).FromJust();
+    std::string flags = ToString(info[4]);
+    uint32_t runtimeVersion = Nan::To<uint32_t>(info[5]).FromJust();
+    auto &diBuilder = DIBuilderWrapper::FromValue(info.Holder())->getDIBuilder();
+
+    auto *diCompileUnit = diBuilder.createCompileUnit(lang, diFile, producer, isOptimized, flags, runtimeVersion);
+
+    info.GetReturnValue().Set(DICompileUnitWrapper::of(diCompileUnit));
 }
 
 NAN_METHOD(DIBuilderWrapper::createFile) {
@@ -114,7 +134,21 @@ NAN_METHOD(DIBuilderWrapper::createFunction) {
 }
 
 NAN_METHOD(DIBuilderWrapper::createModule) {
+    // For now, this function receives only required arguments.
+    if (info.Length() != 4 || !DIScopeWrapper::isInstance(info[0]) || !info[1]->IsString()
+        || !info[2]->IsString() || !info[3]->IsString()) {
+            return Nan::ThrowTypeError("createModule should be called only with 4 arguments");
+    }
 
+    auto *diScope = DIScopeWrapper::FromValue(info[0])->getDIScope();
+    std::string name = ToString(info[1]);
+    std::string configMacros = ToString(info[2]);
+    std::string includePath = ToString(info[3]);
+
+    auto &diBuilder = DIBuilderWrapper::FromValue(info.Holder())->getDIBuilder();
+    auto *diModule = diBuilder.createModule(diScope, name, configMacros, includePath);
+
+    info.GetReturnValue().Set(DIModuleWrapper::of(diModuel));
 }
 
 Nan::Persistent<v8::Function> &diBuilderConstructor() {
