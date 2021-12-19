@@ -15,6 +15,7 @@ private:
 
     explicit DIBuilderWrapper(llvm::Module &, bool, llvm::DICompileUnit *);
 
+    static NAN_METHOD(New);
     static NAN_METHOD(finalize);
     static NAN_METHOD(finalizeSubprogram);
     static NAN_METHOD(createCompileUnit);
@@ -24,10 +25,7 @@ private:
     static NAN_METHOD(createFunction);
     static NAN_METHOD(createModule);
 
-    static inline Nan::Persistent<v8::Function>& irBuilderConstructor() {
-        static Nan::Persistent<v8::Function> constructor {};
-        return constructor;
-    }
+    static Nan::Persistent<v8::FunctionTemplate> &diBuilderTemplate();
 };
 
 #endif //LLVM_NODE_DI_BUILDER_H

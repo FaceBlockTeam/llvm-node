@@ -4,10 +4,31 @@
 #include "util/array.h"
 #include "di-compile-unit.h"
 #include "di-file.h"
+#include "di-type.h"
+#include "di-scope.h"
+#include "di-subprogram.h"
+#include "di-module.h"
+#include "di-expression.h"
 
 NAN_MODULE_INIT(DIBuilderWrapper::Init) {
     auto diBuilder = Nan::GetFunction(Nan::New(diBuilderTemplate())).ToLocalChecked();
     Nan::Set(target, Nan::New("DIBuilder").ToLocalChecked(), diBuilder);
+}
+
+NAN_METHOD(DIBuilderWrapper::New) {
+    if (!info.IsConstructCall()) {
+        return Nan::ThrowTypeError("DIBuilder constructor needs to be called with new");
+    }
+
+    if (info.Length() < 1 || !info[0]->IsExternal()) {
+        return Nan::ThrowTypeError("Expected type pointer");
+    }
+
+    auto &diBuilder = static_cast<llvm::DIBuilder&>(v8::External::Cast(*info[0])->Value());
+    auto *wrapper = new DIBuilderWrapper(diBuilder);
+    wrapper->Wrap(info.This());
+
+    info.GetReturnValue().Set(info.This());
 }
 
 llvm::DIBuilder &DIBuilderWrapper::getDIBuilder() {
@@ -27,7 +48,7 @@ NAN_METHOD(DIBuilderWrapper::finalize) {
 }
 
 NAN_METHOD(DIBuilderWrapper::finalizeSubprogram) {
-    if (info.Length() != 1 || !DISubprogamWrapper::isInstance(info[0])) {
+    if (info.Length() != 1 || !DISubprogramWrapper::isInstance(info[0])) {
         return Nan::ThrowTypeError("finalizeSubprogram should have received only 1 pointer of DISubporgram");
     }
     auto &diBuilder = DIBuilderWrapper::FromValue(info.Holder())->getDIBuilder();
@@ -87,7 +108,7 @@ NAN_METHOD(DIBuilderWrapper::createInheritance) {
 
     auto *diDerivedType = diBuilder.createInheritance(derivedType, baseType, baseOffset, vbPtrOffset, flags);
 
-    info.GetReturnValue().Set(DIDerivedType::of(diDerivedType));
+    info.GetReturnValue().Set(DIDerivedTypeWrapper::of(diDerivedType));
 }
 
 NAN_METHOD(DIBuilderWrapper::createExpression) {
@@ -106,7 +127,7 @@ NAN_METHOD(DIBuilderWrapper::createExpression) {
         diExpression = diBuilder.createExpression();
     }
 
-    info.GetReturnValue().Set(DIExpression::of(diExpression));
+    info.GetReturnValue().Set(DIExpressionWrapper::of(diExpression));
 }
 
 NAN_METHOD(DIBuilderWrapper::createFunction) {
@@ -122,7 +143,7 @@ NAN_METHOD(DIBuilderWrapper::createFunction) {
     std::string linkageName = ToString(info[2]);
     auto *diFile = DIFileWrapper::FromValue(info[3])->getDIFile();
     uint32_t lineNo = Nan::To<uint32_t>(info[4]).FromJust();
-    auto *diSubroutineType = DISubroutineType::FromValue(info[5])->getDISubroutineType();
+    auto *diSubroutineType = DISubroutineTypeWrapper::FromValue(info[5])->getDISubroutineType();
     uint32_t scopeLine = Nan::To<uint32_t>(info[6]).FromJust();
 
     auto &diBuilder = DIBuilderWrapper::FromValue(info.Holder())->getDIBuilder();
@@ -130,7 +151,7 @@ NAN_METHOD(DIBuilderWrapper::createFunction) {
     llvm::DISubprogram *diSubprogram = diBuilder.createFunction(diScope, name, linkageName,
         diFile, lineNo, diSubroutineType, scopeLine);
 
-   info.GetReturnValue().Set(DISubprogram::of(diSubprogram));
+   info.GetReturnValue().Set(DISubprogramWrapper::of(diSubprogram));
 }
 
 NAN_METHOD(DIBuilderWrapper::createModule) {
@@ -148,11 +169,26 @@ NAN_METHOD(DIBuilderWrapper::createModule) {
     auto &diBuilder = DIBuilderWrapper::FromValue(info.Holder())->getDIBuilder();
     auto *diModule = diBuilder.createModule(diScope, name, configMacros, includePath);
 
-    info.GetReturnValue().Set(DIModuleWrapper::of(diModuel));
+    info.GetReturnValue().Set(DIModuleWrapper::of(diModule));
 }
 
-Nan::Persistent<v8::Function> &diBuilderConstructor() {
-    static Nan::Persistent<v8::Function> constructor {};
-    return constructor;
+Nan::Persistent<v8::FunctionTemplate> &DIBuilderWrapper::diBuilderTemplate() {
+    Nan::Persistent<v8::FunctionTemplate> functionTemplate;
+    if (functionTemplate.IsEmpty()) {
+        v8::Local<v8::FunctionTemplate> localTemplate = Nan::New<v8::FunctionTemplate>(DIBuilderWrapper::New);
+        localTemplate->SetClassName(Nan::New("DIBuilder").ToLocalChecked());
+        localTemplate->InstanceTemplate()->SetInternalFieldCount(1);
+        Nan::SetPrototypeMethod(localTemplate, "finalize", DIBuilderWrapper::finalize);
+        Nan::SetPrototypeMethod(localTemplate, "finalizeSubprogram", DIBuilderWrapper::finalizeSubprogram);
+        Nan::SetPrototypeMethod(localTemplate, "createCompileUnit", DIBuilderWrapper::createCompileUnit);
+        Nan::SetPrototypeMethod(localTemplate, "createFile", DIBuilderWrapper::createFile);
+        Nan::SetPrototypeMethod(localTemplate, "createInheritance", DIBuilderWrapper::createInheritance);
+        Nan::SetPrototypeMethod(localTemplate, "createExpression", DIBuilderWrapper::createExpression);
+        Nan::SetPrototypeMethod(localTemplate, "createFunction", DIBuilderWrapper::createFunction);
+        Nan::SetPrototypeMethod(localTemplate, "createModule", DIBuilderWrapper::createModule);
+        functionTemplate.Reset(localTemplate);
+    }
+
+    return functionTemplate;
 }
 
