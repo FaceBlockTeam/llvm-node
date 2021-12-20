@@ -9,6 +9,7 @@
 #include "di-subprogram.h"
 #include "di-module.h"
 #include "di-expression.h"
+#include "di-derived-type.h"
 
 NAN_MODULE_INIT(DIBuilderWrapper::Init) {
     auto diBuilder = Nan::GetFunction(Nan::New(diBuilderTemplate())).ToLocalChecked();
