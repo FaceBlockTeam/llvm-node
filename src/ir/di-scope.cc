@@ -1,6 +1,7 @@
 #include <nan.h>
 #include <llvm/IR/DebugInfoMetadata.h>
 #include "di-scope.h"
+#include "di-file.h"
 
 NAN_MODULE_INIT(DIScopeWrapper::Init) {
     auto diScope = Nan::GetFunction(Nan::New(diScopeTemplate())).ToLocalChecked();
@@ -49,6 +50,10 @@ Nan::Persistent<v8::FunctionTemplate> &DIScopeWrapper::diScopeTemplate() {
         v8::Local<v8::FunctionTemplate> localTemplate = Nan::New<v8::FunctionTemplate>(DIScopeWrapper::New);
         localTemplate->SetClassName(Nan::New("DIScope").ToLocalChecked());
         localTemplate->InstanceTemplate()->SetInternalFieldCount(1);
+        Nan::SetPrototypeMethod(localTemplate, "getFile", DIScopeWrapper::getFile);
+        Nan::SetPrototypeMethod(localTemplate, "getFilename", DIScopeWrapper::getFilename);
+        Nan::SetPrototypeMethod(localTemplate, "getDirectory", DIScopeWrapper::getDirectory);
+        Nan::SetPrototypeMethod(localTemplate, "getName", DIScopeWrapper::getName);
         functionTemplate.Reset(localTemplate);
     }
 
@@ -56,18 +61,42 @@ Nan::Persistent<v8::FunctionTemplate> &DIScopeWrapper::diScopeTemplate() {
 }
 
 NAN_METHOD(DIScopeWrapper::getFile) {
+    if (info.Length() != 0) {
+        return Nan::ThrowTypeError("No argument is required");
+    }
 
+    auto *diScope = DIScopeWrapper::FromValue(info.Holder())->getDIScope();
+    auto *diFile = diScope->getFile();
+    info.GetReturnValue().Set(DIFileWrapper::of(diFile));
 }
 
 NAN_METHOD(DIScopeWrapper::getFilename) {
+    if (info.Length() != 0) {
+        return Nan::ThrowTypeError("No argument is required");
+    }
 
+    auto *diScope = DIScopeWrapper::FromValue(info.Holder())->getDIScope();
+    std::string filename = diScope->getFilename().str();
+    info.GetReturnValue().Set(Nan::New(filename).ToLocalChecked());
 }
 
 
 NAN_METHOD(DIScopeWrapper::getDirectory) {
-    
+    if (info.Length() != 0) {
+        return Nan::ThrowTypeError("No argument is required");
+    }
+
+    auto *diScope = DIScopeWrapper::FromValue(info.Holder())->getDIScope();
+    std::string directory = diScope->getDirectory().str();
+    info.GetReturnValue().Set(Nan::New(directory).ToLocalChecked());
 }
 
 NAN_METHOD(DIScopeWrapper::getName) {
+    if (info.Length() != 0) {
+        return Nan::ThrowTypeError("No argument is required");
+    }
 
+    auto *diScope = DIScopeWrapper::FromValue(info.Holder())->getDIScope();
+    std::string name = diScope->getName().str();
+    info.GetReturnValue().Set(Nan::New(name).ToLocalChecked());
 }

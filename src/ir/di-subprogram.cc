@@ -35,7 +35,7 @@ NAN_METHOD(DISubprogramWrapper::New) {
         return Nan::ThrowTypeError("Expected type pointer");
     }
 
-    auto *diSubprogram = static_cast<llvm::DIType*>(v8::External::Cast(*info[0])->Value());
+    auto *diSubprogram = static_cast<llvm::DISubprogram*>(v8::External::Cast(*info[0])->Value());
     auto *wrapper = new DISubprogramWrapper(diSubprogram);
     wrapper->Wrap(info.This());
 
