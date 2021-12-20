@@ -10,6 +10,9 @@
 #include "di-module.h"
 #include "di-expression.h"
 #include "di-derived-type.h"
+#include "di-flags.h"
+#include "di-subroutine-type.h"
+#include "module.h"
 
 NAN_MODULE_INIT(DIBuilderWrapper::Init) {
     auto diBuilder = Nan::GetFunction(Nan::New(diBuilderTemplate())).ToLocalChecked();
@@ -21,12 +24,18 @@ NAN_METHOD(DIBuilderWrapper::New) {
         return Nan::ThrowTypeError("DIBuilder constructor needs to be called with new");
     }
 
-    if (info.Length() < 1 || !info[0]->IsExternal()) {
-        return Nan::ThrowTypeError("Expected type pointer");
+    if (info.Length() == 0 || info.Length() > 3 || !ModuleWrapper::isInstance(info[0])
+        || (info.Length() == 2 && !info[1]->IsBoolean())
+        || (info.Length() == 3 && !DICompileUnitWrapper::isInstance(info[2]))) {
+            return Nan::ThrowTypeError("DIBuilder received values of wrong argument type or incorrect number of arguments");
     }
 
-    auto &diBuilder = static_cast<llvm::DIBuilder&>(v8::External::Cast(*info[0])->Value());
-    auto *wrapper = new DIBuilderWrapper(diBuilder);
+    auto *module = ModuleWrapper::FromValue(info[0])->getModule();
+    bool allowUnresolved = true;
+    llvm::DICompileUnit *diCompileUnit = nullptr;
+    if (info.Length() == 2) allowUnresolved = Nan::To<bool>(info[1]).FromJust();
+    if (info.Length() == 3) diCompileUnit = DICompileUnitWrapper::FromValue(info[2])->getDICompileUnit();
+    auto *wrapper = new DIBuilderWrapper(*module, allowUnresolved, diCompileUnit);
     wrapper->Wrap(info.This());
 
     info.GetReturnValue().Set(info.This());
@@ -95,13 +104,13 @@ NAN_METHOD(DIBuilderWrapper::createFile) {
 
 NAN_METHOD(DIBuilderWrapper::createInheritance) {
     if (info.Length() != 5 || !DITypeWrapper::isInstance(info[0]) || !DITypeWrapper::isInstance(info[1])
-        || !info[2]->IsNumber() || !info[3]->IsUint32(), !DIFlagsWrapper::isDIFlags(info[4])) {
+        || !info[2]->IsNumber() || !info[3]->IsUint32() || !DIFlagsWrapper::isInstance(info[4])) {
             return Nan::ThrowTypeError("createInstance shoule be called exactly with 5 arguments");
     }
 
     auto *derivedType = DITypeWrapper::FromValue(info[0])->getDIType();
     auto *baseType = DITypeWrapper::FromValue(info[1])->getDIType();
-    uint64_t baseOffset = Nan::To<uint64_t>(info[2]).FromJust();
+    uint64_t baseOffset = Nan::To<double_t>(info[2]).FromJust();
     uint32_t vbPtrOffset = Nan::To<uint32_t>(info[3]).FromJust();
     auto flags = DIFlagsWrapper::FromValue(info[4])->getDIFlags();
 
