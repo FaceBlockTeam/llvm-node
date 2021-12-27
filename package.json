@@ -1,9 +1,12 @@
 {
   "name": "@lungchen/llvm-node",
-  "version": "0.0.19",
-  "description": "Node Bindings for LLVM >=11",
-  "author": "Micha Reiser <micha@famreiser.ch>",
-  "repository": "https://github.com/MichaReiser/llvm-node.git",
+  "version": "0.0.20",
+  "description": "Node Bindings for LLVM >=13",
+  "contributors": [
+    "Micha Reiser <micha@famreiser.ch>",
+    "Lung-Chen Huang <lungchen.huang@gmail.com>"
+  ],
+  "repository": "https://github.com/sbip-sg/llvm-node.git",
   "license": "MIT",
   "main": "index.js",
   "typings": "./llvm-node.d.ts",
