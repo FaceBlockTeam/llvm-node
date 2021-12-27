@@ -43,7 +43,7 @@ bool DIFileWrapper::isInstance(v8::Local<v8::Value> value) {
 DIFileWrapper::DIFileWrapper(llvm::DIFile *file): diFile(file) {}
 
 Nan::Persistent<v8::FunctionTemplate> &DIFileWrapper::diFileTemplate() {
-    Nan::Persistent<v8::FunctionTemplate> functionTemplate;
+    static Nan::Persistent<v8::FunctionTemplate> functionTemplate;
     if (functionTemplate.IsEmpty()) {
         v8::Local<v8::FunctionTemplate> localTemplate = Nan::New<v8::FunctionTemplate>(DIFileWrapper::New);
         localTemplate->SetClassName(Nan::New("DIFile").ToLocalChecked());

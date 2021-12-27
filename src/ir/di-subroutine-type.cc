@@ -43,7 +43,7 @@ NAN_METHOD(DISubroutineTypeWrapper::New) {
 }
 
 Nan::Persistent<v8::FunctionTemplate> &DISubroutineTypeWrapper::diSubroutineTypeTemplate() {
-    Nan::Persistent<v8::FunctionTemplate> functionTemplate;
+    static Nan::Persistent<v8::FunctionTemplate> functionTemplate;
     if (functionTemplate.IsEmpty()) {
         v8::Local<v8::FunctionTemplate> localTemplate = Nan::New<v8::FunctionTemplate>(DISubroutineTypeWrapper::New);
         localTemplate->SetClassName(Nan::New("DISubroutineType").ToLocalChecked());

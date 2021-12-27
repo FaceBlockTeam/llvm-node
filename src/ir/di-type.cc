@@ -74,7 +74,7 @@ NAN_METHOD(DITypeWrapper::getName) {
 }
 
 Nan::Persistent<v8::FunctionTemplate> &DITypeWrapper::diTypeTemplate() {
-    Nan::Persistent<v8::FunctionTemplate> functionTemplate;
+    static Nan::Persistent<v8::FunctionTemplate> functionTemplate;
     if (functionTemplate.IsEmpty()) {
         v8::Local<v8::FunctionTemplate> localTemplate = Nan::New<v8::FunctionTemplate>(DITypeWrapper::New);
         localTemplate->SetClassName(Nan::New("DIType").ToLocalChecked());

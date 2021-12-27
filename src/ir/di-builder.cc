@@ -1,7 +1,7 @@
 #include <nan.h>
 #include "di-builder.h"
-#include "util/string.h"
-#include "util/array.h"
+#include "../util/string.h"
+#include "../util/array.h"
 #include "di-compile-unit.h"
 #include "di-file.h"
 #include "di-type.h"
@@ -183,7 +183,7 @@ NAN_METHOD(DIBuilderWrapper::createModule) {
 }
 
 Nan::Persistent<v8::FunctionTemplate> &DIBuilderWrapper::diBuilderTemplate() {
-    Nan::Persistent<v8::FunctionTemplate> functionTemplate;
+    static Nan::Persistent<v8::FunctionTemplate> functionTemplate;
     if (functionTemplate.IsEmpty()) {
         v8::Local<v8::FunctionTemplate> localTemplate = Nan::New<v8::FunctionTemplate>(DIBuilderWrapper::New);
         localTemplate->SetClassName(Nan::New("DIBuilder").ToLocalChecked());

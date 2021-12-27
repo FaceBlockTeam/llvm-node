@@ -35,7 +35,7 @@ NAN_METHOD(DIExpressionWrapper::New) {
 }
 
 Nan::Persistent<v8::FunctionTemplate> &DIExpressionWrapper::diExpressionTemplate() {
-    Nan::Persistent<v8::FunctionTemplate> functionTemplate;
+    static Nan::Persistent<v8::FunctionTemplate> functionTemplate;
     if (functionTemplate.IsEmpty()) {
         v8::Local<v8::FunctionTemplate> localTemplate = Nan::New<v8::FunctionTemplate>(DIExpressionWrapper::New);
         localTemplate->SetClassName(Nan::New("DIExpression").ToLocalChecked());

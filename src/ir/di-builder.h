@@ -3,7 +3,7 @@
 
 #include <nan.h>
 #include <llvm/IR/DIBuilder.h>
-#include "src/util/from-value-mixin.h"
+#include "../util/from-value-mixin.h"
 
 class DIBuilderWrapper: public Nan::ObjectWrap, public FromValueMixin<DIBuilderWrapper> {
 public:

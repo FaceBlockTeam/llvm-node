@@ -35,7 +35,7 @@ NAN_METHOD(DIDerivedTypeWrapper::New) {
 }
 
 Nan::Persistent<v8::FunctionTemplate> &DIDerivedTypeWrapper::diDerivedTypeTemplate() {
-    Nan::Persistent<v8::FunctionTemplate> functionTemplate;
+    static Nan::Persistent<v8::FunctionTemplate> functionTemplate;
     if (functionTemplate.IsEmpty()) {
         v8::Local<v8::FunctionTemplate> localTemplate = Nan::New<v8::FunctionTemplate>(DIDerivedTypeWrapper::New);
         localTemplate->SetClassName(Nan::New("DIDerivedType").ToLocalChecked());

@@ -13,7 +13,7 @@ llvm::DINode::DIFlags DIFlagsWrapper::getDIFlags() {
 
 v8::Local<v8::Object> DIFlagsWrapper::of(llvm::DINode::DIFlags diFlags) {
     auto constructorFunction = Nan::GetFunction(Nan::New(diFlagsTemplate())).ToLocalChecked();
-    v8::Local<v8::Value> args[1] = { Nan::New<v8::External>(diFlags) };
+    v8::Local<v8::Value> args[1] = { Nan::New<v8::External>(&diFlags) };
     auto instance = Nan::NewInstance(constructorFunction, 1, args).ToLocalChecked();
 
     Nan::EscapableHandleScope escapeScpoe;
@@ -43,7 +43,7 @@ NAN_METHOD(DIFlagsWrapper::New) {
 }
 
 Nan::Persistent<v8::FunctionTemplate> &DIFlagsWrapper::diFlagsTemplate() {
-    Nan::Persistent<v8::FunctionTemplate> functionTemplate;
+    static Nan::Persistent<v8::FunctionTemplate> functionTemplate;
     if (functionTemplate.IsEmpty()) {
         v8::Local<v8::FunctionTemplate> localTemplate = Nan::New<v8::FunctionTemplate>(DIFlagsWrapper::New);
         localTemplate->SetClassName(Nan::New("DIFlags").ToLocalChecked());

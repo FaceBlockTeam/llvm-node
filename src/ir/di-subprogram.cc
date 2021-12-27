@@ -43,7 +43,7 @@ NAN_METHOD(DISubprogramWrapper::New) {
 }
 
 Nan::Persistent<v8::FunctionTemplate> &DISubprogramWrapper::diSubprogramTemplate() {
-    Nan::Persistent<v8::FunctionTemplate> functionTemplate;
+    static Nan::Persistent<v8::FunctionTemplate> functionTemplate;
     if (functionTemplate.IsEmpty()) {
         v8::Local<v8::FunctionTemplate> localTemplate = Nan::New<v8::FunctionTemplate>(DISubprogramWrapper::New);
         localTemplate->SetClassName(Nan::New("DISubprogram").ToLocalChecked());

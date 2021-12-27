@@ -43,7 +43,7 @@ bool DICompileUnitWrapper::isInstance(v8::Local<v8::Value> value) {
 DICompileUnitWrapper::DICompileUnitWrapper(llvm::DICompileUnit *cu): diCompileUnit(cu) {}
 
 Nan::Persistent<v8::FunctionTemplate> &DICompileUnitWrapper::diCompileUnitTemplate() {
-    Nan::Persistent<v8::FunctionTemplate> functionTemplate;
+    static Nan::Persistent<v8::FunctionTemplate> functionTemplate;
     if (functionTemplate.IsEmpty()) {
         v8::Local<v8::FunctionTemplate> localTemplate = Nan::New<v8::FunctionTemplate>(DICompileUnitWrapper::New);
         localTemplate->SetClassName(Nan::New("DICompileUnit").ToLocalChecked());

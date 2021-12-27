@@ -36,7 +36,7 @@ v8::Local<v8::Object> DIModuleWrapper::of(llvm::DIModule *diModule) {
 DIModuleWrapper::DIModuleWrapper(llvm::DIModule *module): diModule(module) {}
 
 Nan::Persistent<v8::FunctionTemplate> &DIModuleWrapper::diModuleTemplate() {
-    Nan::Persistent<v8::FunctionTemplate> functionTemplate;
+    static Nan::Persistent<v8::FunctionTemplate> functionTemplate;
     if (functionTemplate.IsEmpty()) {
         v8::Local<v8::FunctionTemplate> localTemplate = Nan::New<v8::FunctionTemplate>(DIModuleWrapper::New);
         localTemplate->SetClassName(Nan::New("DIModule").ToLocalChecked());
