@@ -6,6 +6,17 @@
 #include "data-layout.h"
 #include "function-type.h"
 #include "ir-builder.h"
+#include "di-builder.h"
+#include "di-compile-unit.h"
+#include "di-derived-type.h"
+#include "di-expression.h"
+#include "di-file.h"
+#include "di-flags.h"
+#include "di-module.h"
+#include "di-scope.h"
+#include "di-subprogram.h"
+#include "di-subroutine-type.h"
+#include "di-type.h"
 #include "module.h"
 #include "llvm-context.h"
 #include "type.h"
@@ -57,6 +68,17 @@ NAN_MODULE_INIT(InitIR) {
     ConstantIntWrapper::Init(target);
     ConstantPointerNullWrapper::Init(target);
     DataLayoutWrapper::Init(target);
+    DIBuilderWrapper::Init(target);
+    DICompileUnitWrapper::Init(target);
+    DIDerivedTypeWrapper::Init(target);
+    DIExpressionWrapper::Init(target);
+    DIFileWrapper::Init(target);
+    DIFlagsWrapper::Init(target);
+    DIModuleWrapper::Init(target);
+    DIScopeWrapper::Init(target);
+    DISubprogramWrapper::Init(target);
+    DISubroutineTypeWrapper::Init(target);
+    DITypeWrapper::Init(target);
     FunctionWrapper::Init(target);
     FunctionTypeWrapper::Init(target);
     GlobalVariableWrapper::Init(target);

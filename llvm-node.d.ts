@@ -285,6 +285,64 @@ declare namespace llvm {
     private constructor();
   }
 
+  class DIFile {
+    private constructor();
+  }
+
+  class DICompileUnit {
+    private constructor();
+  }
+
+  class DIDerivedType {
+    private constructor();
+  }
+
+  class DIType {
+    private constructor();
+    getLine(): number;
+    getScope(): DIScope;
+    getName(): string;
+  }
+
+  class DIFlags {
+    private constructor();
+  }
+
+  class DIExpression {
+    private constructor();
+  }
+
+  class DISubprogram {
+    private constructor();
+  }
+
+  class DIModule {
+    private constructor();
+  }
+
+  class DIScope {
+    getFile(): DIFile;
+    getFilename(): string;
+    getDirectory(): string;
+    getName(): string;
+  }
+
+  class DISubroutineType {
+    private constructor();
+  }
+
+  class DIBuiler {
+    constructor(module: Module, allowUnresolved: boolean, cu: DICompileUnit);
+    createCompileUnit(lang: number, file: DIFile, producer: string, isOptimized: boolean, flags: string, rv: number): DICompileUnit;
+    createFile(filename: string, directory: string): DIFile;
+    createInheritance(type: DIType, baseType: DIType, baseOffset: number, vBPtrOffset: number, flags: DIFlags): DIDerivedType;
+    createExpression(addr: number[]): DIExpression;
+    createFunction(scope: DIScope, name: string, linkageName: string, file: DIFile, lineNo: number, type: DISubroutineType, scopeLine: number): DISubprogram;
+    createModule(scope: DIScope, name: string, configurationMacros: string, includePath: string): DIModule;
+    finalize(): void;
+    finalizeSubprogram(diSubprogram: DISubprogram): void;
+  }
+
   class Function extends Constant {
     static create(functionType: FunctionType, linkageTypes: LinkageTypes, name?: string, module?: Module): Function;
     static lookupIntrinsicID(name: string): Intrinsic.ID;
