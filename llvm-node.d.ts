@@ -331,7 +331,7 @@ declare namespace llvm {
     private constructor();
   }
 
-  class DIBuiler {
+  class DIBuilder {
     constructor(module: Module, allowUnresolved: boolean, cu: DICompileUnit);
     createCompileUnit(lang: number, file: DIFile, producer: string, isOptimized: boolean, flags: string, rv: number): DICompileUnit;
     createFile(filename: string, directory: string): DIFile;
