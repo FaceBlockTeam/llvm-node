@@ -131,8 +131,14 @@ NAN_METHOD(DIBuilderWrapper::createExpression) {
     auto &diBuilder = DIBuilderWrapper::FromValue(info.Holder())->getDIBuilder();
 
     if (info.Length() == 1) {
-        auto addr = toVector<uint64_t>(info[0]);
-        diExpression = diBuilder.createExpression(addr);
+        auto addr = toVector<uint32_t>(info[0]);
+        
+        std::vector<uint64_t> newAddr;
+        for (auto &element: addr) {
+            uint64_t newElement = static_cast<uint64_t>(element);
+            newAddr.push_back(newElement);
+        }
+        diExpression = diBuilder.createExpression(newAddr);
     } else {
         diExpression = diBuilder.createExpression();
     }
