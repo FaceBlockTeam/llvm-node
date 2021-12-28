@@ -42,6 +42,8 @@ private:
     static NAN_GETTER(getVisibility);
     static NAN_SETTER(setVisibility);
     static NAN_METHOD(viewCFG);
+    static NAN_METHOD(setSubprogram);
+    static NAN_METHOD(getSubprogram);
 
     static Nan::Persistent<v8::FunctionTemplate>& functionTemplate();
 };

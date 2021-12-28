@@ -8,6 +8,7 @@
 #include "module.h"
 #include "argument.h"
 #include "basic-block.h"
+#include "di-subprogram.h"
 
 FunctionWrapper::FunctionWrapper(llvm::Function *function) : ConstantWrapper { function } {}
 
@@ -54,6 +55,8 @@ Nan::Persistent<v8::FunctionTemplate> &FunctionWrapper::functionTemplate() {
         Nan::SetPrototypeMethod(localTemplate, "getEntryBlock", FunctionWrapper::getEntryBlock);
         Nan::SetPrototypeMethod(localTemplate, "getBasicBlocks", FunctionWrapper::getBasicBlocks);
         Nan::SetPrototypeMethod(localTemplate, "viewCFG", FunctionWrapper::viewCFG);
+        Nan::SetPrototypeMethod(localTemplate, "setSubprogram", FunctionWrapper::setSubprogram);
+        Nan::SetPrototypeMethod(localTemplate, "getSubprogram", FunctionWrapper::getSubprogram);
         Nan::SetAccessor(localTemplate->InstanceTemplate(), Nan::New("callingConv").ToLocalChecked(), FunctionWrapper::getCallingConv, FunctionWrapper::setCallingConv);
         Nan::SetAccessor(localTemplate->InstanceTemplate(), Nan::New("visibility").ToLocalChecked(), FunctionWrapper::getVisibility, FunctionWrapper::setVisibility);
 
@@ -61,6 +64,21 @@ Nan::Persistent<v8::FunctionTemplate> &FunctionWrapper::functionTemplate() {
     }
 
     return tmpl;
+}
+
+NAN_METHOD(FunctionWrapper::setSubprogram) {
+    if (info.Length() != 1 || !DISubprogramWrapper::isInstance(info[0])) {
+        return Nan::ThrowTypeError("DISubprogram should receive only 1 argument");
+    }
+    auto *function = FunctionWrapper::FromValue(info.Holder())->getFunction();
+    auto *subprogram = DISubprogramWrapper::FromValue(info[0])->getDISubprogram();
+    function->setSubprogram(subprogram);
+}
+
+NAN_METHOD(FunctionWrapper::getSubprogram) {
+    auto *function = FunctionWrapper::FromValue(info.Holder())->getFunction();
+    auto *subprogram = function->getSubprogram();
+    info.GetReturnValue().Set(DISubprogramWrapper::of(subprogram));
 }
 
 v8::Local<v8::Object> FunctionWrapper::of(llvm::Function *function) {
