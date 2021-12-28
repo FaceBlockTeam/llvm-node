@@ -13,7 +13,7 @@ class ModuleWrapper: public Nan::ObjectWrap, public FromValueMixin<ModuleWrapper
 public:
 
     static NAN_MODULE_INIT(Init);
-
+    static v8::Local<v8::Object> of(llvm::Module *);
     llvm::Module* getModule();
 
     static bool isInstance(v8::Local<v8::Value> value);

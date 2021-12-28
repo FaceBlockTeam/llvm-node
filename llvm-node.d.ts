@@ -285,20 +285,36 @@ declare namespace llvm {
     private constructor();
   }
 
-  class DIFile {
+  class DILocalScope extends DIScope {
+    getSubprogram(): DISubprogram;
+  }
+
+  class DILocation {
+    private constructor();
+    get(context: LLVMContext, line: number, column: number, scope: DILocalScope): DILocation;
+  }
+
+  class DIFile extends DIScope {
     private constructor();
   }
 
-  class DICompileUnit {
+  class DICompileUnit extends DIScope {
     private constructor();
   }
 
-  class DIDerivedType {
+  class DIDerivedType extends DIType {
     private constructor();
   }
 
-  class DIType {
+  class DIBasicType extends DIType {
     private constructor();
+  }
+
+  class DIStringType extends DIType {
+    private constructor();
+  }
+
+  class DIType extends DIScope {
     getLine(): number;
     getScope(): DIScope;
     getName(): string;
@@ -312,27 +328,63 @@ declare namespace llvm {
     private constructor();
   }
 
-  class DISubprogram {
+  class DISubprogram extends DILocalScope {
     private constructor();
   }
 
-  class DIModule {
+  class DIModule extends DIScope {
     private constructor();
   }
 
-  class DIScope {
+  class DIScope extends Metadata {
     getFile(): DIFile;
     getFilename(): string;
     getDirectory(): string;
     getName(): string;
   }
 
-  class DISubroutineType {
+  namespace Metadata {
+
+    enum StorageType {
+      Uniqued,
+      Distinct,
+      Temporary
+    }
+  }
+
+  class Metadata {
+    constructor(id: number, storage: Metadata.StorageType);
+    dump(): void;
+    getMetadataID(): number;
+  }
+
+  class DISubroutineType extends DIType {
     private constructor();
   }
 
+  class DIVariable {
+
+  }
+
+  class DILocalVariable extends DIVariable {
+
+  }
+
+  class Instruction extends Value {
+    getParent(): BasicBlock;
+    getFunction(): Function;
+    getModule(): Module | undefined;
+    getNumSuccessors(): number;
+  }
+
   class DIBuilder {
-    constructor(module: Module, allowUnresolved: boolean, cu: DICompileUnit);
+    constructor(module: Module, allowUnresolved?: boolean, cu?: DICompileUnit);
+    insertDeclare(storage: Value, varInfo: DILocalVariable, expr: DIExpression, dl: DILocation, insertAtEnd: BasicBlock): Instruction;
+    insertDbgValueIntrinsic(val: Value, varInfo: DILocalVariable, expr: DIExpression, dl: DILocation, insertAtEnd: BasicBlock): Instruction;
+    getOrCreateTypeArray(elements: Metadata[]): DITypeRefArray;
+    createBasicType(name: string, sizeInBits: number, encoding: number): DIBasicType;
+    createAutoVariable(scope: DIScope, name: string, file: DIFile, lineNo: number, type: DIType): DILocalVariable;
+    createParameterVariable(scope: DIScope, name: string, argNo: number, file: DIFile, lineNo: number, type: DIType): DILocalVariable;
     createCompileUnit(lang: number, file: DIFile, producer: string, isOptimized: boolean, flags: string, rv: number): DICompileUnit;
     createFile(filename: string, directory: string): DIFile;
     createInheritance(type: DIType, baseType: DIType, baseOffset: number, vBPtrOffset: number, flags: DIFlags): DIDerivedType;
@@ -341,6 +393,21 @@ declare namespace llvm {
     createModule(scope: DIScope, name: string, configurationMacros: string, includePath: string): DIModule;
     finalize(): void;
     finalizeSubprogram(diSubprogram: DISubprogram): void;
+  }
+
+  type DITypeRefArray = Array<DIType>;
+
+  namespace dwarf {
+    enum TypeKind {
+      DW_ATE_address = 0x01,
+      DW_ATE_boolean = 0x02,
+      DW_ATE_complex_float = 0x03,
+      DW_ATE_float = 0x04,
+      DW_ATE_signed = 0x05,
+      DW_ATE_signed_char = 0x06,
+      DW_ATE_unsigned = 0x07,
+      DW_ATE_unsigned_char = 0x08
+    }
   }
 
   class Function extends Constant {
@@ -369,6 +436,10 @@ declare namespace llvm {
     getBasicBlocks(): BasicBlock[];
 
     viewCFG(): void;
+
+    setSubprogram(subprogram: DISubprogram): void;
+
+    getSubprogram(): DISubprogram;
   }
 
   class GlobalVariable extends Constant {

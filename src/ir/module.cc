@@ -234,3 +234,12 @@ llvm::Module *ModuleWrapper::getModule() {
 bool ModuleWrapper::isInstance(v8::Local<v8::Value> value) {
     return Nan::New(moduleTemplate())->HasInstance(value);
 }
+
+v8::Local<v8::Object> ModuleWrapper::of(llvm::Module *module) {
+    auto constructorFunction = Nan::GetFunction(Nan::New(moduleTemplate())).ToLocalChecked();
+    v8::Local<v8::Value> args[1] = { Nan::New<v8::External>(module) };
+    auto instance = Nan::NewInstance(constructorFunction, 1, args).ToLocalChecked();
+
+    Nan::EscapableHandleScope escapeScpoe;
+    return escapeScpoe.Escape(instance);
+}
