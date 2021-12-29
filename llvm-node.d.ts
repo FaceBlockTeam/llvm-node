@@ -131,6 +131,8 @@ declare namespace llvm {
     replaceAllUsesWith(value: Value): void;
 
     useEmpty(): boolean;
+
+    getContext(): LLVMContext;
   }
 
   class Argument extends Value {
@@ -291,7 +293,7 @@ declare namespace llvm {
 
   class DILocation {
     private constructor();
-    get(context: LLVMContext, line: number, column: number, scope: DILocalScope): DILocation;
+    static get(context: LLVMContext, line: number, column: number, scope: DILocalScope): DILocation;
   }
 
   class DIFile extends DIScope {
@@ -382,6 +384,7 @@ declare namespace llvm {
     insertDeclare(storage: Value, varInfo: DILocalVariable, expr: DIExpression, dl: DILocation, insertAtEnd: BasicBlock): Instruction;
     insertDbgValueIntrinsic(val: Value, varInfo: DILocalVariable, expr: DIExpression, dl: DILocation, insertAtEnd: BasicBlock): Instruction;
     getOrCreateTypeArray(elements: Metadata[]): DITypeRefArray;
+    createSubroutineType(parameterTypes: DITypeRefArray): DISubroutineType;
     createBasicType(name: string, sizeInBits: number, encoding: number): DIBasicType;
     createAutoVariable(scope: DIScope, name: string, file: DIFile, lineNo: number, type: DIType): DILocalVariable;
     createParameterVariable(scope: DIScope, name: string, argNo: number, file: DIFile, lineNo: number, type: DIType): DILocalVariable;
@@ -397,17 +400,15 @@ declare namespace llvm {
 
   type DITypeRefArray = Array<DIType>;
 
-  namespace dwarf {
-    enum TypeKind {
-      DW_ATE_address = 0x01,
-      DW_ATE_boolean = 0x02,
-      DW_ATE_complex_float = 0x03,
-      DW_ATE_float = 0x04,
-      DW_ATE_signed = 0x05,
-      DW_ATE_signed_char = 0x06,
-      DW_ATE_unsigned = 0x07,
-      DW_ATE_unsigned_char = 0x08
-    }
+  enum dwarf {
+    DW_ATE_address = 0x01,
+    DW_ATE_boolean = 0x02,
+    DW_ATE_complex_float = 0x03,
+    DW_ATE_float = 0x04,
+    DW_ATE_signed = 0x05,
+    DW_ATE_signed_char = 0x06,
+    DW_ATE_unsigned = 0x07,
+    DW_ATE_unsigned_char = 0x08
   }
 
   class Function extends Constant {
