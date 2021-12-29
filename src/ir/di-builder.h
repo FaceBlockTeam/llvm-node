@@ -24,6 +24,12 @@ private:
     static NAN_METHOD(createExpression);
     static NAN_METHOD(createFunction);
     static NAN_METHOD(createModule);
+    static NAN_METHOD(insertDeclare);
+    static NAN_METHOD(insertDbgValueIntrinsic);
+    static NAN_METHOD(getOrCreateTypeArray);
+    static NAN_METHOD(createBasicType);
+    static NAN_METHOD(createAutoVariable);
+    static NAN_METHOD(createParameterVariable);
 
     static Nan::Persistent<v8::FunctionTemplate> &diBuilderTemplate();
 };

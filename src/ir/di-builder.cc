@@ -2,6 +2,13 @@
 #include "di-builder.h"
 #include "../util/string.h"
 #include "../util/array.h"
+#include "value.h"
+#include "basic-block.h"
+#include "instruction.h"
+#include "di-type-ref-array.h"
+#include "di-location.h"
+#include "di-local-variable.h"
+#include "di-basic-type.h"
 #include "di-compile-unit.h"
 #include "di-file.h"
 #include "di-type.h"
@@ -188,6 +195,98 @@ NAN_METHOD(DIBuilderWrapper::createModule) {
     info.GetReturnValue().Set(DIModuleWrapper::of(diModule));
 }
 
+
+NAN_METHOD(DIBuilderWrapper::insertDeclare) {
+    if (info.Length() != 5 || !ValueWrapper::isInstance(info[0])
+        || !DILocalVariableWrapper::isInstance(info[1]) || !DIExpressionWrapper::isInstance(info[2])
+        || !DILocationWrapper::isInstance(info[3]) || !BasicBlockWrapper::isInstance(info[4])) {
+            return Nan::ThrowSyntaxError("insertDeclare should have received 5 arguments of correct type");
+    }
+
+    auto &diBuilder = DIBuilderWrapper::FromValue(info.Holder())->getDIBuilder();
+    auto *value = ValueWrapper::FromValue(info[0])->getValue();
+    auto *diLocalVariable = DILocalVariableWrapper::FromValue(info[1])->getDILocalVariable();
+    auto *diExpression = DIExpressionWrapper::FromValue(info[2])->getDIExpression();
+    auto *diLocation = DILocationWrapper::FromValue(info[3])->getDILocation();
+    auto *basicBlock = BasicBlockWrapper::FromValue(info[4])->getBasicBlock();
+    diBuilder.insertDeclare(value, diLocalVariable, diExpression, diLocation, basicBlock);
+}
+
+NAN_METHOD(DIBuilderWrapper::insertDbgValueIntrinsic) {
+    if (info.Length() != 5 || !ValueWrapper::isInstance(info[0])
+        || !DILocalVariableWrapper::isInstance(info[1]) || !DIExpressionWrapper::isInstance(info[2])
+        || !DILocationWrapper::isInstance(info[3]) || !BasicBlockWrapper::isInstance(info[4])) {
+            return Nan::ThrowSyntaxError("insertDbgValueIntrinsic should have received 5 arguments of correct type");
+    }
+
+    auto &diBuilder = DIBuilderWrapper::FromValue(info.Holder())->getDIBuilder();
+    auto *value = ValueWrapper::FromValue(info[0])->getValue();
+    auto *diLocalVariable = DILocalVariableWrapper::FromValue(info[1])->getDILocalVariable();
+    auto *diExpression = DIExpressionWrapper::FromValue(info[2])->getDIExpression();
+    auto *diLocation = DILocationWrapper::FromValue(info[3])->getDILocation();
+    auto *basicBlock = BasicBlockWrapper::FromValue(info[4])->getBasicBlock();
+    diBuilder.insertDbgValueIntrinsic(value, diLocalVariable, diExpression, diLocation, basicBlock);
+}
+
+NAN_METHOD(DIBuilderWrapper::getOrCreateTypeArray) {
+    if (info.Length() != 1 || !info[0]->IsArray()) {
+        return Nan::ThrowSyntaxError("getOrCreateTypeArray should have received 1 argument of correct type");
+    }
+    // eTypeArray(elements: Metadata[]): DITypeRefArray;
+    auto &diBuilder = DIBuilderWrapper::FromValue(info.Holder())->getDIBuilder();
+    auto metadataArray = toVector<llvm::Metadata*>(info[0]);
+    auto diTypeRefArray = diBuilder.getOrCreateTypeArray(metadataArray);
+    info.GetReturnValue().Set(DITypeRefArrayWrapper::of(diTypeRefArray));
+}
+
+NAN_METHOD(DIBuilderWrapper::createBasicType) {
+    if (info.Length() != 3 || !info[0]->IsString() || !info[1]->IsUint32() || !info[2]->IsUint32()) {
+        return Nan::ThrowSyntaxError("createBasicType should have received 3 arguments of correct type");
+    }
+
+    auto &diBuilder = DIBuilderWrapper::FromValue(info.Holder())->getDIBuilder();
+    std::string name = ToString(info[0]);
+    uint64_t sizeInBits = Nan::To<uint32_t>(info[1]).FromJust();
+    uint32_t encoding = Nan::To<uint32_t>(info[2]).FromJust();
+    auto *diBasicType = diBuilder.createBasicType(name, sizeInBits, encoding);
+    info.GetReturnValue().Set(DIBasicTypeWrapper::of(diBasicType));
+}
+
+NAN_METHOD(DIBuilderWrapper::createAutoVariable) {
+    if (info.Length() != 5 || !DIScopeWrapper::isInstance(info[0]) || !info[1]->IsString() || !DIFileWrapper::isInstance(info[2])
+        || !info[3]->IsUint32() || !DITypeWrapper::isInstance(info[4])) {
+            return Nan::ThrowSyntaxError("createAutoVariable should have received 5 arguments of correct type");
+    }
+
+    auto &diBuilder = DIBuilderWrapper::FromValue(info.Holder())->getDIBuilder();
+    auto *diScope = DIScopeWrapper::FromValue(info[0])->getDIScope();
+    std::string name = ToString(info[1]);
+    auto *diFile = DIFileWrapper::FromValue(info[2])->getDIFile();
+    uint32_t line = Nan::To<uint32_t>(info[3]).FromJust();
+    auto *diType = DITypeWrapper::FromValue(info[4])->getDIType();
+    auto *diLocalVariable = diBuilder.createAutoVariable(diScope, name, diFile, line, diType);
+
+    info.GetReturnValue().Set(DILocalVariableWrapper::of(diLocalVariable));
+}
+
+NAN_METHOD(DIBuilderWrapper::createParameterVariable) {
+    if (info.Length() != 6 || !DIScopeWrapper::isInstance(info[0]) || !info[1]->IsString() || !info[2]->IsUint32()
+        || !DIFileWrapper::isInstance(info[3]) || !info[4]->IsUint32() || !DITypeWrapper::isInstance(info[5])) {
+            return Nan::ThrowSyntaxError("createParameterVariable should have received 6 arguments of correct type");
+    }
+
+    auto &diBuilder = DIBuilderWrapper::FromValue(info.Holder())->getDIBuilder();
+    auto *diScope = DIScopeWrapper::FromValue(info[0])->getDIScope();
+    std::string name = ToString(info[1]);
+    uint32_t argNo = Nan::To<uint32_t>(info[2]).FromJust();
+    auto *diFile = DIFileWrapper::FromValue(info[3])->getDIFile();
+    uint32_t line = Nan::To<uint32_t>(info[4]).FromJust();
+    auto *diType = DITypeWrapper::FromValue(info[5])->getDIType();
+    auto *diLocalVariable = diBuilder.createParameterVariable(diScope, name, argNo, diFile, line, diType);
+
+    info.GetReturnValue().Set(DILocalVariableWrapper::of(diLocalVariable));
+}
+
 Nan::Persistent<v8::FunctionTemplate> &DIBuilderWrapper::diBuilderTemplate() {
     static Nan::Persistent<v8::FunctionTemplate> functionTemplate;
     if (functionTemplate.IsEmpty()) {
@@ -202,9 +301,14 @@ Nan::Persistent<v8::FunctionTemplate> &DIBuilderWrapper::diBuilderTemplate() {
         Nan::SetPrototypeMethod(localTemplate, "createExpression", DIBuilderWrapper::createExpression);
         Nan::SetPrototypeMethod(localTemplate, "createFunction", DIBuilderWrapper::createFunction);
         Nan::SetPrototypeMethod(localTemplate, "createModule", DIBuilderWrapper::createModule);
+        Nan::SetPrototypeMethod(localTemplate, "insertDeclare", DIBuilderWrapper::insertDeclare);
+        Nan::SetPrototypeMethod(localTemplate, "insertDbgValueIntrinsic", DIBuilderWrapper::insertDbgValueIntrinsic);
+        Nan::SetPrototypeMethod(localTemplate, "getOrCreateTypeArray", DIBuilderWrapper::getOrCreateTypeArray);
+        Nan::SetPrototypeMethod(localTemplate, "createBasicType", DIBuilderWrapper::createBasicType);
+        Nan::SetPrototypeMethod(localTemplate, "createAutoVariable", DIBuilderWrapper::createAutoVariable);
+        Nan::SetPrototypeMethod(localTemplate, "createParameterVariable", DIBuilderWrapper::createParameterVariable);
         functionTemplate.Reset(localTemplate);
     }
 
     return functionTemplate;
 }
-
