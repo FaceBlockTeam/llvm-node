@@ -288,6 +288,17 @@ NAN_METHOD(DIBuilderWrapper::createParameterVariable) {
     info.GetReturnValue().Set(DILocalVariableWrapper::of(diLocalVariable));
 }
 
+NAN_METHOD(DIBuilderWrapper::createSubroutineType) {
+    if (info.Length() != 1 || !DITypeRefArrayWrapper::isInstance(info[0])) {
+        return Nan::ThrowSyntaxError("createSubroutineType should have received 1 argument of correct type");
+    }
+    
+    auto &diBuilder = DIBuilderWrapper::FromValue(info.Holder())->getDIBuilder();
+    auto typeRefArray = DITypeRefArrayWrapper::FromValue(info[0])->getDITypeRefArray();
+    auto *subroutineType = diBuilder.createSubroutineType(typeRefArray);
+    info.GetReturnValue().Set(DISubroutineTypeWrapper::of(subroutineType));
+}
+
 Nan::Persistent<v8::FunctionTemplate> &DIBuilderWrapper::diBuilderTemplate() {
     static Nan::Persistent<v8::FunctionTemplate> functionTemplate;
     if (functionTemplate.IsEmpty()) {

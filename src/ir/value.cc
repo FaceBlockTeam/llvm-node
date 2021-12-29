@@ -136,6 +136,16 @@ NAN_METHOD(ValueWrapper::useEmpty)
     info.GetReturnValue().Set(Nan::New(value->use_empty()));
 }
 
+NAN_METHOD(ValueWrapper::getContext) {
+    if (info.Length() != 0) {
+        return Nan::ThrowSyntaxError("No arguments required");
+    }
+
+    auto *value = ValueWrapper::FromValue(info.Holder())->getValue();
+    auto &context = value->getContext();
+    info.GetReturnValue().Set(LLVMContextWrapper::of(context));
+}
+
 v8::Local<v8::Object> ValueWrapper::of(llvm::Value *value)
 {
     v8::Local<v8::Object> result{};
