@@ -20,6 +20,7 @@
 #include "di-flags.h"
 #include "di-subroutine-type.h"
 #include "module.h"
+#include "array-ref.h"
 
 NAN_MODULE_INIT(DIBuilderWrapper::Init) {
     auto diBuilder = Nan::GetFunction(Nan::New(diBuilderTemplate())).ToLocalChecked();
@@ -232,10 +233,10 @@ NAN_METHOD(DIBuilderWrapper::getOrCreateTypeArray) {
     if (info.Length() != 1 || !info[0]->IsArray()) {
         return Nan::ThrowSyntaxError("getOrCreateTypeArray should have received 1 argument of correct type");
     }
-    // eTypeArray(elements: Metadata[]): DITypeRefArray;
+
     auto &diBuilder = DIBuilderWrapper::FromValue(info.Holder())->getDIBuilder();
-    auto metadataArray = toVector<llvm::Metadata*>(info[0]);
-    auto diTypeRefArray = diBuilder.getOrCreateTypeArray(metadataArray);
+    auto metadataArrayRef = ArrayRefWrapper<llvm::Metadata*>::FromValue(info[0])->getArrayRef();
+    auto diTypeRefArray = diBuilder.getOrCreateTypeArray(metadataArrayRef);
     info.GetReturnValue().Set(DITypeRefArrayWrapper::of(diTypeRefArray));
 }
 
