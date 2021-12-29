@@ -16,6 +16,14 @@ v8::Local<v8::Object> DIExpressionWrapper::of(llvm::DIExpression *diExpression) 
     return escapeScpoe.Escape(instance);
 }
 
+llvm::DIExpression *DIExpressionWrapper::getDIExpression() {
+    return diExpression;
+}
+
+bool DIExpressionWrapper::isInstance(v8::Local<v8::Value> value) {
+    return Nan::New(diExpressionTemplate())->HasInstance(value);
+}
+
 DIExpressionWrapper::DIExpressionWrapper(llvm::DIExpression *expression): diExpression(expression) {}
 
 NAN_METHOD(DIExpressionWrapper::New) {

@@ -9,6 +9,8 @@ class DIExpressionWrapper: public Nan::ObjectWrap, public FromValueMixin<DIExpre
     public:
         static NAN_MODULE_INIT(Init);
         static v8::Local<v8::Object> of(llvm::DIExpression *);
+        static bool isInstance(v8::Local<v8::Value>);
+        llvm::DIExpression *getDIExpression();
 
         DIExpressionWrapper(llvm::DIExpression *);
     
