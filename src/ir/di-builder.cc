@@ -21,6 +21,7 @@
 #include "di-subroutine-type.h"
 #include "module.h"
 #include "array-ref.h"
+#include "metadata.h"
 
 NAN_MODULE_INIT(DIBuilderWrapper::Init) {
     auto diBuilder = Nan::GetFunction(Nan::New(diBuilderTemplate())).ToLocalChecked();
@@ -235,8 +236,15 @@ NAN_METHOD(DIBuilderWrapper::getOrCreateTypeArray) {
     }
 
     auto &diBuilder = DIBuilderWrapper::FromValue(info.Holder())->getDIBuilder();
-    auto metadataArrayRef = ArrayRefWrapper<llvm::Metadata*>::FromValue(info[0])->getArrayRef();
-    auto diTypeRefArray = diBuilder.getOrCreateTypeArray(metadataArrayRef);
+    auto arr = info[0].As<v8::Array>();
+    uint32_t len = arr->Length();
+    std::vector<llvm::Metadata*> metadataArray(len);
+
+    for (uint32_t i = 0; i < len; ++i) {
+        auto localValue = Nan::Get(arr, i).ToLocalChecked();
+        metadataArray[i] = MetadataWrapper::FromValue(localValue)->getMetadata();
+    }
+    auto diTypeRefArray = diBuilder.getOrCreateTypeArray(metadataArray);
     info.GetReturnValue().Set(DITypeRefArrayWrapper::of(diTypeRefArray));
 }
 
