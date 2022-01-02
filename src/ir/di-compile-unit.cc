@@ -1,6 +1,7 @@
 #include <nan.h>
 #include <llvm/IR/DebugInfoMetadata.h>
 #include "di-compile-unit.h"
+#include "di-scope.h"
 
 NAN_MODULE_INIT(DICompileUnitWrapper::Init) {
     auto diCompileUnit = Nan::GetFunction(Nan::New(diCompileUnitTemplate())).ToLocalChecked();
@@ -33,14 +34,14 @@ v8::Local<v8::Object> DICompileUnitWrapper::of(llvm::DICompileUnit *diCompileUni
 }
 
 llvm::DICompileUnit *DICompileUnitWrapper::getDICompileUnit() {
-    return diCompileUnit;
+    return static_cast<llvm::DICompileUnit*>(DIScopeWrapper::getDIScope());
 }
 
 bool DICompileUnitWrapper::isInstance(v8::Local<v8::Value> value) {
     return Nan::New(diCompileUnitTemplate())->HasInstance(value);
 } 
 
-DICompileUnitWrapper::DICompileUnitWrapper(llvm::DICompileUnit *cu): diCompileUnit(cu) {}
+DICompileUnitWrapper::DICompileUnitWrapper(llvm::DICompileUnit *cu): DIScopeWrapper(cu) {}
 
 Nan::Persistent<v8::FunctionTemplate> &DICompileUnitWrapper::diCompileUnitTemplate() {
     static Nan::Persistent<v8::FunctionTemplate> functionTemplate;
@@ -48,6 +49,7 @@ Nan::Persistent<v8::FunctionTemplate> &DICompileUnitWrapper::diCompileUnitTempla
         v8::Local<v8::FunctionTemplate> localTemplate = Nan::New<v8::FunctionTemplate>(DICompileUnitWrapper::New);
         localTemplate->SetClassName(Nan::New("DICompileUnit").ToLocalChecked());
         localTemplate->InstanceTemplate()->SetInternalFieldCount(1);
+        localTemplate->Inherit(Nan::New(DIScopeWrapper::diScopeTemplate()));
         functionTemplate.Reset(localTemplate);
     }
 
