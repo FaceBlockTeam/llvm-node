@@ -51,7 +51,9 @@ jobs:
         run: yarn tsc --strict --noEmit --types . llvm-node.d.ts
 
       - name: Test
-        run: yarn test --ci --coverage
+        run: |
+          npx browserslist@latest --update-db
+          yarn test --ci --coverage
       
       - name: Publish
         env:
