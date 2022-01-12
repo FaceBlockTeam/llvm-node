@@ -27,7 +27,7 @@ NAN_METHOD(PointerTypeWrapper::New) {
 
 NAN_METHOD(PointerTypeWrapper::get) {
     if (info.Length() != 2 || !TypeWrapper::isInstance(info[0]) || !info[1]->IsUint32()) {
-        return Nan::ThrowTypeError("PointerTypeWrapper.get needs to be called with: elementType: Type, addressSpace: uint32");
+        return Nan::ThrowTypeError("PointerTypeWrapper.get needs to be called with: Type/LLVMContext, uint32");
     }
 
     auto* type = TypeWrapper::FromValue(info[0])->getType();
@@ -35,6 +35,18 @@ NAN_METHOD(PointerTypeWrapper::get) {
 
     auto* pointerType = llvm::PointerType::get(type, as);
 
+    info.GetReturnValue().Set(PointerTypeWrapper::of(pointerType));
+}
+
+NAN_METHOD(PointerTypeWrapper::getOpaquePointerType) {
+    if (info.Length() != 2 || LLVMContextWrapper::isInstance(info[0]) || !info[1]->IsUint32()) {
+        return Nan::ThrowTypeError("PointerTypeWrapper.get needs to be called with: Type/LLVMContext, uint32");
+    }
+
+    auto &context = LLVMContextWrapper::FromValue(info[0])->getContext();
+    uint32_t as = Nan::To<uint32_t>(info[1]).FromJust();
+
+    auto *pointerType = llvm::PointerType::get(context, as);
     info.GetReturnValue().Set(PointerTypeWrapper::of(pointerType));
 }
 
@@ -63,6 +75,7 @@ Nan::Persistent<v8::FunctionTemplate>& PointerTypeWrapper::pointerTypeTemplate()
         v8::Local<v8::FunctionTemplate> pointerTypeTemplate = Nan::New<v8::FunctionTemplate>(PointerTypeWrapper::New);
 
         Nan::SetMethod(pointerTypeTemplate, "get", PointerTypeWrapper::get);
+        Nan::SetMethod(pointerTypeTemplate, "get", PointerTypeWrapper::getOpaquePointerType);
         pointerTypeTemplate->SetClassName(Nan::New("PointerType").ToLocalChecked());
         pointerTypeTemplate->InstanceTemplate()->SetInternalFieldCount(1);
         pointerTypeTemplate->Inherit(Nan::New(typeTemplate()));
