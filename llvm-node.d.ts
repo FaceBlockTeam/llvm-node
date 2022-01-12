@@ -679,7 +679,7 @@ declare namespace llvm {
 
   class PointerType extends Type {
     static get(elementType: Type, AS: number): PointerType;
-
+    static get(context: LLVMContext, AS: number): PointerType;
     elementType: Type;
 
     private constructor();
