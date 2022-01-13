@@ -32,7 +32,6 @@ private:
     // Static Methods
     static NAN_METHOD(New);
     static NAN_METHOD(get);
-    static NAN_METHOD(getOpaquePointerType);
     static NAN_GETTER(getElementType);
 };
 

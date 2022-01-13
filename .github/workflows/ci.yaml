@@ -42,9 +42,7 @@ jobs:
             ${{ runner.os }}-yarn-
 
       - name: Yarn install
-        run: |
-          yarn --non-interactive --frozen-lockfile --ignore-scripts
-          npx browserslist@latest --update-db
+        run: yarn --non-interactive --frozen-lockfile --ignore-scripts
 
       - name: Build
         run: CMAKE_BUILD_PARALLEL_LEVEL=$(nproc) yarn build
@@ -53,7 +51,7 @@ jobs:
         run: yarn tsc --strict --noEmit --types . llvm-node.d.ts
 
       - name: Test
-        run: yarn test --ci
+        run: yarn test --ci --coverage
       
       - name: Publish
         env:
