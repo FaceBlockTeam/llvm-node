@@ -5,6 +5,7 @@
 #include "value.h"
 #include "basic-block.h"
 #include "instruction.h"
+#include "di-node-array.h"
 #include "di-type-ref-array.h"
 #include "di-location.h"
 #include "di-local-variable.h"
@@ -248,6 +249,24 @@ NAN_METHOD(DIBuilderWrapper::getOrCreateTypeArray) {
     info.GetReturnValue().Set(DITypeRefArrayWrapper::of(diTypeRefArray));
 }
 
+NAN_METHOD(DIBuilderWrapper::getOrCreateArray) {
+    if (info.Length() != 1 || !info[0]->IsArray()) {
+        return Nan::ThrowSyntaxError("getOrCreateArray should have received 1 argument of correct type");
+    }
+
+    auto &diBuilder = DIBuilderWrapper::FromValue(info.Holder())->getDIBuilder();
+    auto arr = info[0].As<v8::Array>();
+    uint32_t len = arr->Length();
+    std::vector<llvm::Metadata*> metadataArray(len);
+
+    for (uint32_t i = 0; i < len; ++i) {
+        auto localValue = Nan::Get(arr, i).ToLocalChecked();
+        metadataArray[i] = MetadataWrapper::FromValue(localValue)->getMetadata();
+    }
+    auto diNodeArray = diBuilder.getOrCreateArray(metadataArray);
+    info.GetReturnValue().Set(DINodeArrayWrapper::of(diNodeArray));
+}
+
 NAN_METHOD(DIBuilderWrapper::createBasicType) {
     if (info.Length() != 3 || !info[0]->IsString() || !info[1]->IsUint32() || !info[2]->IsUint32()) {
         return Nan::ThrowSyntaxError("createBasicType should have received 3 arguments of correct type");
@@ -307,6 +326,10 @@ NAN_METHOD(DIBuilderWrapper::createSubroutineType) {
     info.GetReturnValue().Set(DISubroutineTypeWrapper::of(subroutineType));
 }
 
+NAN_METHOD(DIBuilderWrapper::createStructType) {
+    // TODO
+}
+
 Nan::Persistent<v8::FunctionTemplate> &DIBuilderWrapper::diBuilderTemplate() {
     static Nan::Persistent<v8::FunctionTemplate> functionTemplate;
     if (functionTemplate.IsEmpty()) {
@@ -324,10 +347,12 @@ Nan::Persistent<v8::FunctionTemplate> &DIBuilderWrapper::diBuilderTemplate() {
         Nan::SetPrototypeMethod(localTemplate, "insertDeclare", DIBuilderWrapper::insertDeclare);
         Nan::SetPrototypeMethod(localTemplate, "insertDbgValueIntrinsic", DIBuilderWrapper::insertDbgValueIntrinsic);
         Nan::SetPrototypeMethod(localTemplate, "getOrCreateTypeArray", DIBuilderWrapper::getOrCreateTypeArray);
+        Nan::SetPrototypeMethod(localTemplate, "getOrCreateArray", DIBuilderWrapper::getOrCreateArray);
         Nan::SetPrototypeMethod(localTemplate, "createBasicType", DIBuilderWrapper::createBasicType);
         Nan::SetPrototypeMethod(localTemplate, "createAutoVariable", DIBuilderWrapper::createAutoVariable);
         Nan::SetPrototypeMethod(localTemplate, "createParameterVariable", DIBuilderWrapper::createParameterVariable);
         Nan::SetPrototypeMethod(localTemplate, "createSubroutineType", DIBuilderWrapper::createSubroutineType);
+        Nan::SetPrototypeMethod(localTemplate, "createStructType", DIBuilderWrapper::createStructType);
         functionTemplate.Reset(localTemplate);
     }
 
