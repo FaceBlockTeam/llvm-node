@@ -312,6 +312,10 @@ declare namespace llvm {
     private constructor();
   }
 
+  class DICompositeType extends DIType {
+    private constructor();
+  }
+
   class DIStringType extends DIType {
     private constructor();
   }
@@ -338,11 +342,15 @@ declare namespace llvm {
     private constructor();
   }
 
-  class DIScope extends Metadata {
+  class DIScope extends DINode {
     getFile(): DIFile;
     getFilename(): string;
     getDirectory(): string;
     getName(): string;
+  }
+
+  class DINode extends Metadata {
+    protected constructor();
   }
 
   namespace Metadata {
@@ -384,8 +392,10 @@ declare namespace llvm {
     insertDeclare(storage: Value, varInfo: DILocalVariable, expr: DIExpression, dl: DILocation, insertAtEnd: BasicBlock): Instruction;
     insertDbgValueIntrinsic(val: Value, varInfo: DILocalVariable, expr: DIExpression, dl: DILocation, insertAtEnd: BasicBlock): Instruction;
     getOrCreateTypeArray(elements: Metadata[]): DITypeRefArray;
+    getOrCreateArray(elements: Metadata[]): DINodeArray;
     createSubroutineType(parameterTypes: DITypeRefArray): DISubroutineType;
     createBasicType(name: string, sizeInBits: number, encoding: number): DIBasicType;
+    createStructType(scope: DIScope, name: string, file: DIFile, lineNo: number, sizeInBits: number, alignInBits: number, flags: DIFlags, derivedFrom: DIType, elements: DINodeArray): DICompositeType;
     createAutoVariable(scope: DIScope, name: string, file: DIFile, lineNo: number, type: DIType): DILocalVariable;
     createParameterVariable(scope: DIScope, name: string, argNo: number, file: DIFile, lineNo: number, type: DIType): DILocalVariable;
     createCompileUnit(lang: number, file: DIFile, producer: string, isOptimized: boolean, flags: string, rv: number): DICompileUnit;
@@ -399,6 +409,8 @@ declare namespace llvm {
   }
 
   type DITypeRefArray = Array<DIType>;
+
+  type DINodeArray = Array<DINode>;
 
   enum dwarf {
     DW_ATE_address = 0x01,
