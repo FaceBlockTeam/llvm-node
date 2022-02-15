@@ -349,6 +349,18 @@ NAN_METHOD(DIBuilderWrapper::createStructType) {
     info.GetReturnValue().Set(DICompositeTypeWrapper::of(diCompositeType));
 }
 
+NAN_METHOD(DIBuilderWrapper::createUnspecifiedType) {
+    if (info.Length() != 1 || !info[0]->IsString()) {
+        return Nan::ThrowSyntaxError("createUnspecifiedType should have received 1 argument");
+    }
+
+    auto &diBuilder = DIBuilderWrapper::FromValue(info.Holder())->getDIBuilder();
+    std::string name = ToString(info[0]);
+
+    auto *diBasicType = diBuilder.createUnspecifiedType(name);
+    info.GetReturnValue().Set(DIBasicTypeWrapper::of(diBasicType));
+}
+
 Nan::Persistent<v8::FunctionTemplate> &DIBuilderWrapper::diBuilderTemplate() {
     static Nan::Persistent<v8::FunctionTemplate> functionTemplate;
     if (functionTemplate.IsEmpty()) {

@@ -33,6 +33,7 @@ private:
     static NAN_METHOD(createParameterVariable);
     static NAN_METHOD(createSubroutineType);
     static NAN_METHOD(createStructType);
+    static NAN_METHOD(createUnspecifiedType);
 
     static Nan::Persistent<v8::FunctionTemplate> &diBuilderTemplate();
 };

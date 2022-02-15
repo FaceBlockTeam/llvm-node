@@ -393,6 +393,7 @@ declare namespace llvm {
     insertDbgValueIntrinsic(val: Value, varInfo: DILocalVariable, expr: DIExpression, dl: DILocation, insertAtEnd: BasicBlock): Instruction;
     getOrCreateTypeArray(elements: Metadata[]): DITypeRefArray;
     getOrCreateArray(elements: Metadata[]): DINodeArray;
+    createUnspecifiedType(name: string): DIBasicType;
     createSubroutineType(parameterTypes: DITypeRefArray): DISubroutineType;
     createBasicType(name: string, sizeInBits: number, encoding: number): DIBasicType;
     createStructType(scope: DIScope, name: string, file: DIFile, lineNo: number, sizeInBits: number, alignInBits: number, flags: DIFlags, derivedFrom: DIType, elements: DINodeArray): DICompositeType;
