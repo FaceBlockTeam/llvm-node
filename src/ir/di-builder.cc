@@ -328,10 +328,10 @@ NAN_METHOD(DIBuilderWrapper::createSubroutineType) {
 }
 
 NAN_METHOD(DIBuilderWrapper::createStructType) {
-    if (info.Length() != 8 || !DIScopeWrapper::isInstance(info[0]) || !info[1]->IsString() || !DIFileWrapper::isInstance(info[2])
+    if (info.Length() != 9 || !DIScopeWrapper::isInstance(info[0]) || !info[1]->IsString() || !DIFileWrapper::isInstance(info[2])
         || !info[3]->IsUint32() || !info[4]->IsUint32() || !info[5]->IsUint32()
-        || !DIFlagsWrapper::isInstance(info[6]) || !DITypeWrapper::isInstance(info[7])) {
-            return Nan::ThrowSyntaxError("createStructType should have received 8 arguments");
+        || !DIFlagsWrapper::isInstance(info[6]) || !DITypeWrapper::isInstance(info[7]) || !DINodeArrayWrapper::isInstance(info[8])) {
+            return Nan::ThrowSyntaxError("createStructType should have received 0 arguments");
     }
 
     auto &diBuilder = DIBuilderWrapper::FromValue(info.Holder())->getDIBuilder();
@@ -343,8 +343,9 @@ NAN_METHOD(DIBuilderWrapper::createStructType) {
     uint32_t align = Nan::To<uint32_t>(info[5]).FromJust();
     auto diFlags = DIFlagsWrapper::FromValue(info[6])->getDIFlags();
     auto *diType = DITypeWrapper::FromValue(info[7])->getDIType();
+    auto diNodeArray = DINodeArrayWrapper::FromValue(info[8])->getDINodeArray();
 
-    auto *diCompositeType = diBuilder.createStructType(diScope, name, diFile, line, size, align, diFlags, diType);
+    auto *diCompositeType = diBuilder.createStructType(diScope, name, diFile, line, size, align, diFlags, diType, diNodeArray);
     info.GetReturnValue().Set(DICompositeTypeWrapper::of(diCompositeType));
 }
 
