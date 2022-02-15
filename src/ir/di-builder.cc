@@ -10,6 +10,7 @@
 #include "di-location.h"
 #include "di-local-variable.h"
 #include "di-basic-type.h"
+#include "di-composite-type.h"
 #include "di-compile-unit.h"
 #include "di-file.h"
 #include "di-type.h"
@@ -327,7 +328,24 @@ NAN_METHOD(DIBuilderWrapper::createSubroutineType) {
 }
 
 NAN_METHOD(DIBuilderWrapper::createStructType) {
-    // TODO
+    if (info.Length() != 8 || !DIScopeWrapper::isInstance(info[0]) || !info[1]->IsString() || !DIFileWrapper::isInstance(info[2])
+        || !info[3]->IsUint32() || !info[4]->IsUint32() || !info[5]->IsUint32()
+        || !DIFlagsWrapper::isInstance(info[6]) || !DITypeWrapper::isInstance(info[7])) {
+            return Nan::ThrowSyntaxError("createStructType should have received 8 arguments");
+    }
+
+    auto &diBuilder = DIBuilderWrapper::FromValue(info.Holder())->getDIBuilder();
+    auto *diScope = DIScopeWrapper::FromValue(info[0])->getDIScope();
+    std::string name = ToString(info[1]);
+    auto *diFile = DIFileWrapper::FromValue(info[2])->getDIFile();
+    uint32_t line = Nan::To<uint32_t>(info[3]).FromJust();
+    uint32_t size = Nan::To<uint32_t>(info[4]).FromJust();
+    uint32_t align = Nan::To<uint32_t>(info[5]).FromJust();
+    auto diFlags = DIFlagsWrapper::FromValue(info[6])->getDIFlags();
+    auto *diType = DITypeWrapper::FromValue(info[7])->getDIType();
+
+    auto *diCompositeType = diBuilder.createStructType(diScope, name, diFile, line, size, align, diFlags, diType);
+    info.GetReturnValue().Set(DICompositeTypeWrapper::of(diCompositeType));
 }
 
 Nan::Persistent<v8::FunctionTemplate> &DIBuilderWrapper::diBuilderTemplate() {
