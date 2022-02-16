@@ -2,6 +2,7 @@
 #include <llvm/IR/DebugInfoMetadata.h>
 #include "di-local-scope.h"
 #include "di-subprogram.h"
+#include "di-scope.h"
 
 NAN_MODULE_INIT(DILocalScopeWrapper::Init) {
     auto diLocalScope = Nan::GetFunction(Nan::New(diLocalScopeTemplate())).ToLocalChecked();
@@ -9,7 +10,7 @@ NAN_MODULE_INIT(DILocalScopeWrapper::Init) {
 }
 
 llvm::DILocalScope *DILocalScopeWrapper::getDILocalScope() {
-    return diLocalScope;
+    return static_cast<llvm::DILocalScope*>(DIScopeWrapper::getDIScope());
 }
 
 v8::Local<v8::Object> DILocalScopeWrapper::of(llvm::DILocalScope *diLocalScope) {
@@ -25,7 +26,7 @@ bool DILocalScopeWrapper::isInstance(v8::Local<v8::Value> value) {
     return Nan::New(diLocalScopeTemplate())->HasInstance(value);
 }
 
-DILocalScopeWrapper::DILocalScopeWrapper(llvm::DILocalScope *localScope): diLocalScope(localScope) {}
+DILocalScopeWrapper::DILocalScopeWrapper(llvm::DILocalScope *localScope): DIScopeWrapper(localScope) {}
 
 
 NAN_METHOD(DILocalScopeWrapper::New) {
@@ -59,6 +60,7 @@ Nan::Persistent<v8::FunctionTemplate> &DILocalScopeWrapper::diLocalScopeTemplate
         v8::Local<v8::FunctionTemplate> localTemplate = Nan::New<v8::FunctionTemplate>(DILocalScopeWrapper::New);
         localTemplate->SetClassName(Nan::New("DILocalScope").ToLocalChecked());
         localTemplate->InstanceTemplate()->SetInternalFieldCount(1);
+        localTemplate->Inherit(Nan::New(DIScopeWrapper::diScopeTemplate()));
         Nan::SetPrototypeMethod(localTemplate, "getSubprogram", DILocalScopeWrapper::getSubprogram);
         functionTemplate.Reset(localTemplate);
     }

@@ -1,6 +1,7 @@
 #include <nan.h>
 #include <llvm/IR/DebugInfoMetadata.h>
 #include "di-subprogram.h"
+#include "di-local-scope.h"
 
 NAN_MODULE_INIT(DISubprogramWrapper::Init) {
     auto diSubprogram = Nan::GetFunction(Nan::New(diSubprogramTemplate())).ToLocalChecked();
@@ -17,14 +18,14 @@ v8::Local<v8::Object> DISubprogramWrapper::of(llvm::DISubprogram *diSubprogram) 
 }
 
 llvm::DISubprogram *DISubprogramWrapper::getDISubprogram() {
-    return diSubprogram;
+    return static_cast<llvm::DISubprogram*>(DILocalScopeWrapper::getDILocalScope());
 }
 
 bool DISubprogramWrapper::isInstance(v8::Local<v8::Value> value) {
     return Nan::New(diSubprogramTemplate())->HasInstance(value);
 }
 
-DISubprogramWrapper::DISubprogramWrapper(llvm::DISubprogram *subprogram): diSubprogram(subprogram) {}
+DISubprogramWrapper::DISubprogramWrapper(llvm::DISubprogram *subprogram): DILocalScopeWrapper(subprogram) {}
 
 NAN_METHOD(DISubprogramWrapper::New) {
     if (!info.IsConstructCall()) {
@@ -48,6 +49,7 @@ Nan::Persistent<v8::FunctionTemplate> &DISubprogramWrapper::diSubprogramTemplate
         v8::Local<v8::FunctionTemplate> localTemplate = Nan::New<v8::FunctionTemplate>(DISubprogramWrapper::New);
         localTemplate->SetClassName(Nan::New("DISubprogram").ToLocalChecked());
         localTemplate->InstanceTemplate()->SetInternalFieldCount(1);
+        localTemplate->Inherit(Nan::New(DILocalScopeWrapper::diLocalScopeTemplate()));
         functionTemplate.Reset(localTemplate);
     }
 
