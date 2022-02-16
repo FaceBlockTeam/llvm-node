@@ -402,7 +402,7 @@ declare namespace llvm {
     createCompileUnit(lang: number, file: DIFile, producer: string, isOptimized: boolean, flags: string, rv: number): DICompileUnit;
     createFile(filename: string, directory: string): DIFile;
     createInheritance(type: DIType, baseType: DIType, baseOffset: number, vBPtrOffset: number, flags: DIFlags): DIDerivedType;
-    createExpression(addr: number[]): DIExpression;
+    createExpression(addr?: number[]): DIExpression;
     createFunction(scope: DIScope, name: string, linkageName: string, file: DIFile, lineNo: number, type: DISubroutineType, scopeLine: number): DISubprogram;
     createModule(scope: DIScope, name: string, configurationMacros: string, includePath: string): DIModule;
     finalize(): void;
