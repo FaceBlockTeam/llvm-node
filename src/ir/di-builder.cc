@@ -134,7 +134,7 @@ NAN_METHOD(DIBuilderWrapper::createInheritance) {
 
 NAN_METHOD(DIBuilderWrapper::createExpression) {
     if (info.Length() > 1 || (info.Length() == 1 && !info[0]->IsBigUint64Array())) {
-        return Nan::ThrowTypeError("createExpression should be called with 2 arguments");
+        return Nan::ThrowTypeError("createExpression should be called with 0 or 1 argument");
     }
 
     llvm::DIExpression *diExpression = nullptr;
