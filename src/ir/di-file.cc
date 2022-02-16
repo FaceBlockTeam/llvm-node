@@ -33,14 +33,14 @@ v8::Local<v8::Object> DIFileWrapper::of(llvm::DIFile *diFile) {
 }
 
 llvm::DIFile *DIFileWrapper::getDIFile() {
-    return diFile;
+    return static_cast<llvm::DIFile*>(DIScopeWrapper::getDIScope());
 }
 
 bool DIFileWrapper::isInstance(v8::Local<v8::Value> value) {
     return Nan::New(diFileTemplate())->HasInstance(value);
 } 
 
-DIFileWrapper::DIFileWrapper(llvm::DIFile *file): diFile(file) {}
+DIFileWrapper::DIFileWrapper(llvm::DIFile *file): DIScopeWrapper(file) {}
 
 Nan::Persistent<v8::FunctionTemplate> &DIFileWrapper::diFileTemplate() {
     static Nan::Persistent<v8::FunctionTemplate> functionTemplate;
@@ -48,6 +48,7 @@ Nan::Persistent<v8::FunctionTemplate> &DIFileWrapper::diFileTemplate() {
         v8::Local<v8::FunctionTemplate> localTemplate = Nan::New<v8::FunctionTemplate>(DIFileWrapper::New);
         localTemplate->SetClassName(Nan::New("DIFile").ToLocalChecked());
         localTemplate->InstanceTemplate()->SetInternalFieldCount(1);
+        localTemplate->Inherit(Nan::New(DIScopeWrapper::diScopeTemplate()));
         functionTemplate.Reset(localTemplate);
     }
 

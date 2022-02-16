@@ -21,7 +21,7 @@ class DITypeWrapper: public Nan::ObjectWrap, public FromValueMixin<DITypeWrapper
         static NAN_METHOD(getLine);
         static NAN_METHOD(getScope);
         static NAN_METHOD(getName);
-
+    protected:
         static Nan::Persistent<v8::FunctionTemplate> &diTypeTemplate();
 };
 

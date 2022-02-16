@@ -16,7 +16,7 @@ v8::Local<v8::Object> DIDerivedTypeWrapper::of(llvm::DIDerivedType *diDerivedTyp
     return escapeScpoe.Escape(instance);
 }
 
-DIDerivedTypeWrapper::DIDerivedTypeWrapper(llvm::DIDerivedType *derivedType): diDerivedType(derivedType) {}
+DIDerivedTypeWrapper::DIDerivedTypeWrapper(llvm::DIDerivedType *derivedType): DITypeWrapper(derivedType) {}
 
 NAN_METHOD(DIDerivedTypeWrapper::New) {
     if (!info.IsConstructCall()) {
@@ -40,6 +40,7 @@ Nan::Persistent<v8::FunctionTemplate> &DIDerivedTypeWrapper::diDerivedTypeTempla
         v8::Local<v8::FunctionTemplate> localTemplate = Nan::New<v8::FunctionTemplate>(DIDerivedTypeWrapper::New);
         localTemplate->SetClassName(Nan::New("DIDerivedType").ToLocalChecked());
         localTemplate->InstanceTemplate()->SetInternalFieldCount(1);
+        localTemplate->Inherit(Nan::New(DITypeWrapper::diTypeTemplate()));
         functionTemplate.Reset(localTemplate);
     }
 

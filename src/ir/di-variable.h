@@ -26,6 +26,7 @@ class DIVariableWrapper: public Nan::ObjectWrap, public FromValueMixin<DIVariabl
         static NAN_METHOD(getFilename);
         static NAN_METHOD(getDirectory);
         static NAN_METHOD(getSizeInBits);
+    protected:
         static Nan::Persistent<v8::FunctionTemplate> &diVariableTemplate();
 };
 

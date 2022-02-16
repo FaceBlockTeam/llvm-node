@@ -9,7 +9,7 @@ NAN_MODULE_INIT(DILocalVariableWrapper::Init) {
 }
 
 llvm::DILocalVariable *DILocalVariableWrapper::getDILocalVariable() {
-    return diLocalVariable;
+    return static_cast<llvm::DILocalVariable*>(DIVariableWrapper::getDIVariable());
 }
 
 v8::Local<v8::Object> DILocalVariableWrapper::of(llvm::DILocalVariable *diLocalVariable) {
@@ -25,7 +25,7 @@ bool DILocalVariableWrapper::isInstance(v8::Local<v8::Value> value) {
     return Nan::New(diLocalVariableTemplate())->HasInstance(value);
 }
 
-DILocalVariableWrapper::DILocalVariableWrapper(llvm::DILocalVariable *localVariable): diLocalVariable(localVariable) {}
+DILocalVariableWrapper::DILocalVariableWrapper(llvm::DILocalVariable *localVariable): DIVariableWrapper(localVariable) {}
     
 NAN_METHOD(DILocalVariableWrapper::New) {
     if (!info.IsConstructCall()) {
@@ -69,6 +69,7 @@ Nan::Persistent<v8::FunctionTemplate> &DILocalVariableWrapper::diLocalVariableTe
         v8::Local<v8::FunctionTemplate> localTemplate = Nan::New<v8::FunctionTemplate>(DILocalVariableWrapper::New);
         localTemplate->SetClassName(Nan::New("DILocalVariable").ToLocalChecked());
         localTemplate->InstanceTemplate()->SetInternalFieldCount(1);
+        localTemplate->Inherit(Nan::New(DIVariableWrapper::diVariableTemplate()));
         Nan::SetPrototypeMethod(localTemplate, "getScope", DILocalVariableWrapper::getScope);
         Nan::SetPrototypeMethod(localTemplate, "isParameter", DILocalVariableWrapper::isParameter);
         functionTemplate.Reset(localTemplate);

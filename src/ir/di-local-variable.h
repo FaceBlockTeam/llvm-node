@@ -4,14 +4,15 @@
 #include <nan.h>
 #include <llvm/IR/DebugInfoMetadata.h>
 #include "../util/from-value-mixin.h"
+#include "di-variable.h"
 
-class DILocalVariableWrapper: public Nan::ObjectWrap, public FromValueMixin<DILocalVariableWrapper> {
+class DILocalVariableWrapper: public DIVariableWrapper, public FromValueMixin<DILocalVariableWrapper> {
     public:
         static NAN_MODULE_INIT(Init);
         llvm::DILocalVariable *getDILocalVariable();
         static v8::Local<v8::Object> of(llvm::DILocalVariable *);
         static bool isInstance(v8::Local<v8::Value>);
-
+        using FromValueMixin<DILocalVariableWrapper>::FromValue;
         DILocalVariableWrapper(llvm::DILocalVariable *);
     
     private:

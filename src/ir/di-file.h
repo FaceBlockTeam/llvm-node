@@ -4,14 +4,15 @@
 #include <nan.h>
 #include <llvm/IR/DebugInfoMetadata.h>
 #include "../util/from-value-mixin.h"
+#include "di-scope.h"
 
-class DIFileWrapper: public Nan::ObjectWrap, public FromValueMixin<DIFileWrapper> {
+class DIFileWrapper: public DIScopeWrapper, public FromValueMixin<DIFileWrapper> {
     public:
         static NAN_MODULE_INIT(Init);
         static v8::Local<v8::Object> of(llvm::DIFile *);
         llvm::DIFile *getDIFile();
         static bool isInstance(v8::Local<v8::Value>);
-
+        using FromValueMixin<DIFileWrapper>::FromValue;
         DIFileWrapper(llvm::DIFile *);
     
     private:

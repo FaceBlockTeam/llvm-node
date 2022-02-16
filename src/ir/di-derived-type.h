@@ -4,12 +4,13 @@
 
 #include <llvm/IR/DebugInfoMetadata.h>
 #include "../util/from-value-mixin.h"
+#include "di-type.h"
 
-class DIDerivedTypeWrapper: public Nan::ObjectWrap, public FromValueMixin<DIDerivedTypeWrapper> {
+class DIDerivedTypeWrapper: public DITypeWrapper, public FromValueMixin<DIDerivedTypeWrapper> {
     public:
         static NAN_MODULE_INIT(Init);
         static v8::Local<v8::Object> of(llvm::DIDerivedType *);
-
+        using FromValueMixin<DIDerivedTypeWrapper>::FromValue;
         DIDerivedTypeWrapper(llvm::DIDerivedType *);
     
     private:

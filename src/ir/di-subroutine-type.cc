@@ -8,7 +8,7 @@ NAN_MODULE_INIT(DISubroutineTypeWrapper::Init) {
 }
 
 llvm::DISubroutineType *DISubroutineTypeWrapper::getDISubroutineType() {
-    return diSubroutineType;
+    return static_cast<llvm::DISubroutineType*>(DITypeWrapper::getDIType());
 }
 
 v8::Local<v8::Object> DISubroutineTypeWrapper::of(llvm::DISubroutineType *diSubroutineType) {
@@ -24,7 +24,7 @@ bool DISubroutineTypeWrapper::isInstance(v8::Local<v8::Value> value) {
     return Nan::New(diSubroutineTypeTemplate())->HasInstance(value);
 }
 
-DISubroutineTypeWrapper::DISubroutineTypeWrapper(llvm::DISubroutineType *subroutineType): diSubroutineType(subroutineType) {}
+DISubroutineTypeWrapper::DISubroutineTypeWrapper(llvm::DISubroutineType *subroutineType): DITypeWrapper(subroutineType) {}
 
 NAN_METHOD(DISubroutineTypeWrapper::New) {
     if (!info.IsConstructCall()) {
@@ -48,6 +48,7 @@ Nan::Persistent<v8::FunctionTemplate> &DISubroutineTypeWrapper::diSubroutineType
         v8::Local<v8::FunctionTemplate> localTemplate = Nan::New<v8::FunctionTemplate>(DISubroutineTypeWrapper::New);
         localTemplate->SetClassName(Nan::New("DISubroutineType").ToLocalChecked());
         localTemplate->InstanceTemplate()->SetInternalFieldCount(1);
+        localTemplate->Inherit(Nan::New(DITypeWrapper::diTypeTemplate()));
         functionTemplate.Reset(localTemplate);
     }
 

@@ -8,7 +8,7 @@ NAN_MODULE_INIT(DICompositeTypeWrapper::Init) {
 }
 
 llvm::DICompositeType *DICompositeTypeWrapper::getDICompositeType() {
-    return diCompositeType;
+    return static_cast<llvm::DICompositeType*>(DITypeWrapper::getDIType());
 }
 
 v8::Local<v8::Object> DICompositeTypeWrapper::of(llvm::DICompositeType *diCompositeType) {
@@ -24,7 +24,7 @@ bool DICompositeTypeWrapper::isInstance(v8::Local<v8::Value> value) {
     return Nan::New(diCompositeTypeTemplate())->HasInstance(value);
 }
 
-DICompositeTypeWrapper::DICompositeTypeWrapper(llvm::DICompositeType *compositeType): diCompositeType(compositeType) {}
+DICompositeTypeWrapper::DICompositeTypeWrapper(llvm::DICompositeType *compositeType): DITypeWrapper(compositeType) {}
 
 NAN_METHOD(DICompositeTypeWrapper::New) {
     if (!info.IsConstructCall()) {
@@ -48,6 +48,7 @@ Nan::Persistent<v8::FunctionTemplate> &DICompositeTypeWrapper::diCompositeTypeTe
         v8::Local<v8::FunctionTemplate> localTemplate = Nan::New<v8::FunctionTemplate>(DICompositeTypeWrapper::New);
         localTemplate->SetClassName(Nan::New("DICompositeType").ToLocalChecked());
         localTemplate->InstanceTemplate()->SetInternalFieldCount(1);
+        localTemplate->Inherit(Nan::New(DITypeWrapper::diTypeTemplate()));
         functionTemplate.Reset(localTemplate);
     }
 

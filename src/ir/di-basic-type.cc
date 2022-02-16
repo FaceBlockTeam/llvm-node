@@ -8,7 +8,7 @@ NAN_MODULE_INIT(DIBasicTypeWrapper::Init) {
 }
 
 llvm::DIBasicType *DIBasicTypeWrapper::getDIBasicType() {
-    return diBasicType;
+    return static_cast<llvm::DIBasicType*>(DITypeWrapper::getDIType());
 }
 
 v8::Local<v8::Object> DIBasicTypeWrapper::of(llvm::DIBasicType *diBasicType) {
@@ -24,7 +24,7 @@ bool DIBasicTypeWrapper::isInstance(v8::Local<v8::Value> value) {
     return Nan::New(diBasicTypeTemplate())->HasInstance(value);
 }
 
-DIBasicTypeWrapper::DIBasicTypeWrapper(llvm::DIBasicType *BasicType): diBasicType(BasicType) {}
+DIBasicTypeWrapper::DIBasicTypeWrapper(llvm::DIBasicType *BasicType): DITypeWrapper(BasicType) {}
 
 NAN_METHOD(DIBasicTypeWrapper::New) {
     if (!info.IsConstructCall()) {
@@ -48,6 +48,7 @@ Nan::Persistent<v8::FunctionTemplate> &DIBasicTypeWrapper::diBasicTypeTemplate()
         v8::Local<v8::FunctionTemplate> localTemplate = Nan::New<v8::FunctionTemplate>(DIBasicTypeWrapper::New);
         localTemplate->SetClassName(Nan::New("DIBasicType").ToLocalChecked());
         localTemplate->InstanceTemplate()->SetInternalFieldCount(1);
+        localTemplate->Inherit(Nan::New(DITypeWrapper::diTypeTemplate()));
         functionTemplate.Reset(localTemplate);
     }
 
