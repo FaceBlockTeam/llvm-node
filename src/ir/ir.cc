@@ -17,6 +17,7 @@
 #include "di-subprogram.h"
 #include "di-subroutine-type.h"
 #include "di-type.h"
+#include "di-location.h"
 #include "module.h"
 #include "llvm-context.h"
 #include "type.h"
@@ -79,6 +80,7 @@ NAN_MODULE_INIT(InitIR) {
     DISubprogramWrapper::Init(target);
     DISubroutineTypeWrapper::Init(target);
     DITypeWrapper::Init(target);
+    DILocationWrapper::Init(target);
     FunctionWrapper::Init(target);
     FunctionTypeWrapper::Init(target);
     GlobalVariableWrapper::Init(target);
