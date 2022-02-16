@@ -384,6 +384,7 @@ Nan::Persistent<v8::FunctionTemplate> &DIBuilderWrapper::diBuilderTemplate() {
         Nan::SetPrototypeMethod(localTemplate, "createParameterVariable", DIBuilderWrapper::createParameterVariable);
         Nan::SetPrototypeMethod(localTemplate, "createSubroutineType", DIBuilderWrapper::createSubroutineType);
         Nan::SetPrototypeMethod(localTemplate, "createStructType", DIBuilderWrapper::createStructType);
+        Nan::SetPrototypeMethod(localTemplate, "createUnspecifiedType", DIBuilderWrapper::createUnspecifiedType);
         functionTemplate.Reset(localTemplate);
     }
 
