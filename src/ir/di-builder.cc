@@ -19,7 +19,6 @@
 #include "di-module.h"
 #include "di-expression.h"
 #include "di-derived-type.h"
-#include "di-flags.h"
 #include "di-subroutine-type.h"
 #include "module.h"
 #include "array-ref.h"
@@ -115,7 +114,7 @@ NAN_METHOD(DIBuilderWrapper::createFile) {
 
 NAN_METHOD(DIBuilderWrapper::createInheritance) {
     if (info.Length() != 5 || !DITypeWrapper::isInstance(info[0]) || !DITypeWrapper::isInstance(info[1])
-        || !info[2]->IsNumber() || !info[3]->IsUint32() || !DIFlagsWrapper::isInstance(info[4])) {
+        || !info[2]->IsNumber() || !info[3]->IsUint32() || !info[4]->IsUint32()) {
             return Nan::ThrowTypeError("createInstance shoule be called exactly with 5 arguments");
     }
 
@@ -123,11 +122,12 @@ NAN_METHOD(DIBuilderWrapper::createInheritance) {
     auto *baseType = DITypeWrapper::FromValue(info[1])->getDIType();
     uint64_t baseOffset = Nan::To<double_t>(info[2]).FromJust();
     uint32_t vbPtrOffset = Nan::To<uint32_t>(info[3]).FromJust();
-    auto flags = DIFlagsWrapper::FromValue(info[4])->getDIFlags();
+    uint32_t flags = Nan::To<uint32_t>(info[4]).FromJust();
+    auto diFlags = static_cast<llvm::DINode::DIFlags>(flags);
 
     auto &diBuilder = DIBuilderWrapper::FromValue(info.Holder())->getDIBuilder();
 
-    auto *diDerivedType = diBuilder.createInheritance(derivedType, baseType, baseOffset, vbPtrOffset, flags);
+    auto *diDerivedType = diBuilder.createInheritance(derivedType, baseType, baseOffset, vbPtrOffset, diFlags);
 
     info.GetReturnValue().Set(DIDerivedTypeWrapper::of(diDerivedType));
 }
@@ -330,7 +330,7 @@ NAN_METHOD(DIBuilderWrapper::createSubroutineType) {
 NAN_METHOD(DIBuilderWrapper::createStructType) {
     if (info.Length() != 9 || !DIScopeWrapper::isInstance(info[0]) || !info[1]->IsString() || !DIFileWrapper::isInstance(info[2])
         || !info[3]->IsUint32() || !info[4]->IsUint32() || !info[5]->IsUint32()
-        || !DIFlagsWrapper::isInstance(info[6]) || !DITypeWrapper::isInstance(info[7]) || !DINodeArrayWrapper::isInstance(info[8])) {
+        || !info[6]->IsUint32() || !DITypeWrapper::isInstance(info[7]) || !DINodeArrayWrapper::isInstance(info[8])) {
             return Nan::ThrowSyntaxError("createStructType should have received 0 arguments");
     }
 
@@ -341,7 +341,8 @@ NAN_METHOD(DIBuilderWrapper::createStructType) {
     uint32_t line = Nan::To<uint32_t>(info[3]).FromJust();
     uint32_t size = Nan::To<uint32_t>(info[4]).FromJust();
     uint32_t align = Nan::To<uint32_t>(info[5]).FromJust();
-    auto diFlags = DIFlagsWrapper::FromValue(info[6])->getDIFlags();
+    uint32_t flags = Nan::To<uint32_t>(info[6]).FromJust();
+    auto diFlags = static_cast<llvm::DINode::DIFlags>(flags);
     auto *diType = DITypeWrapper::FromValue(info[7])->getDIType();
     auto diNodeArray = DINodeArrayWrapper::FromValue(info[8])->getDINodeArray();
 

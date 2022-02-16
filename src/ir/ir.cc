@@ -11,13 +11,13 @@
 #include "di-derived-type.h"
 #include "di-expression.h"
 #include "di-file.h"
-#include "di-flags.h"
 #include "di-module.h"
 #include "di-scope.h"
 #include "di-subprogram.h"
 #include "di-subroutine-type.h"
 #include "di-type.h"
 #include "di-location.h"
+#include "di-node.h"
 #include "module.h"
 #include "llvm-context.h"
 #include "type.h"
@@ -49,6 +49,7 @@
 #include "atomic-rmw-inst.h"
 #include "undef-value.h"
 #include "switch-inst.h"
+#include "dwarf.h"
 
 NAN_MODULE_INIT(InitIR) {
     AllocaInstWrapper::Init(target);
@@ -74,13 +75,13 @@ NAN_MODULE_INIT(InitIR) {
     DIDerivedTypeWrapper::Init(target);
     DIExpressionWrapper::Init(target);
     DIFileWrapper::Init(target);
-    DIFlagsWrapper::Init(target);
     DIModuleWrapper::Init(target);
     DIScopeWrapper::Init(target);
     DISubprogramWrapper::Init(target);
     DISubroutineTypeWrapper::Init(target);
     DITypeWrapper::Init(target);
     DILocationWrapper::Init(target);
+    DINodeWrapper::Init(target);
     FunctionWrapper::Init(target);
     FunctionTypeWrapper::Init(target);
     GlobalVariableWrapper::Init(target);
@@ -98,4 +99,5 @@ NAN_MODULE_INIT(InitIR) {
     InitVerifier(target);
     InitVisibilityTypes(target);
     InitIntrinsics(target);
+    InitDwarf(target);
 }
