@@ -41,7 +41,7 @@ Nan::Persistent<v8::FunctionTemplate> &ValueWrapper::valueTemplate()
         Nan::SetPrototypeMethod(localTemplate, "deleteValue", ValueWrapper::deleteValue);
         Nan::SetPrototypeMethod(localTemplate, "replaceAllUsesWith", ValueWrapper::replaceAllUsesWith);
         Nan::SetPrototypeMethod(localTemplate, "useEmpty", ValueWrapper::useEmpty);
-
+        Nan::SetPrototypeMethod(localTemplate, "getContext", ValueWrapper::getContext);
         auto function = Nan::GetFunction(localTemplate).ToLocalChecked();
         Nan::Set(function, Nan::New("MaxAlignmentExponent").ToLocalChecked(), Nan::New(llvm::Value::MaxAlignmentExponent));
         Nan::Set(function, Nan::New("MaximumAlignment").ToLocalChecked(), Nan::New(llvm::Value::MaximumAlignment));
