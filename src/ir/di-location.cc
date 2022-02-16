@@ -65,7 +65,8 @@ Nan::Persistent<v8::FunctionTemplate> &DILocationWrapper::diLocationTemplate() {
         v8::Local<v8::FunctionTemplate> localTemplate = Nan::New<v8::FunctionTemplate>(DILocationWrapper::New);
         localTemplate->SetClassName(Nan::New("DILocation").ToLocalChecked());
         localTemplate->InstanceTemplate()->SetInternalFieldCount(1);
-        Nan::SetPrototypeMethod(localTemplate, "get", DILocationWrapper::get);
+        auto function = Nan::GetFunction(localTemplate).ToLocalChecked();
+        Nan::SetMethod(function, "get", DILocationWrapper::get);
         functionTemplate.Reset(localTemplate);
     }
 
