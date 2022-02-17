@@ -353,6 +353,47 @@ declare namespace llvm {
     protected constructor();
   }
 
+  namespace DINode {
+    enum DIFlags {
+      FlagAccessibility,
+      FlagAllCallsDescribed,
+      FlagAppleBlock,
+      FlagArtificial,
+      FlagBigEndian,
+      FlagBitField,
+      FlagEnumClass,
+      FlagExplicit,
+      FlagExportSymbols,
+      FlagFwdDecl,
+      FlagIndirectVirtualBase,
+      FlagIntroducedVirtual,
+      FlagLargest,
+      FlagLittleEndian,
+      FlagLValueReference,
+      FlagMultipleInheritance,
+      FlagNonTrivial,
+      FlagNoReturn,
+      FlagObjcClassComplete,
+      FlagObjectPointer,
+      FlagPrivate,
+      FlagProtected,
+      FlagPrototyped,
+      FlagPtrToMemberRep,
+      FlagPublic,
+      FlagReservedBit4,
+      FlagRValueReference,
+      FlagSingleInheritance,
+      FlagStaticMember,
+      FlagThunk,
+      FlagTypePassByReference,
+      FlagTypePassByValue,
+      FlagVector,
+      FlagVirtual,
+      FlagVirtualInheritance,
+      FlagZero
+    }
+  }
+
   namespace Metadata {
 
     enum StorageType {
