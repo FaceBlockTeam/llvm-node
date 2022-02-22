@@ -77,6 +77,7 @@ private:
     static NAN_METHOD(CreateSwitch);
     static NAN_METHOD(GetInsertBlock);
     static NAN_METHOD(SetInsertionPoint);
+    static NAN_METHOD(SetCurrentDebugLocation);
 
     static inline Nan::Persistent<v8::Function>& irBuilderConstructor() {
         static Nan::Persistent<v8::Function> constructor {};

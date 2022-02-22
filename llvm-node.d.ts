@@ -920,6 +920,8 @@ declare namespace llvm {
     createZExt(value: Value, destType: Type, name?: string): Value;
 
     getInsertBlock(): BasicBlock | undefined;
+
+    setCurrentDebugLocation(dl: DILocation): void;
   }
 
   namespace Intrinsic {

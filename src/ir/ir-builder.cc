@@ -16,6 +16,7 @@
 #include "../util/array.h"
 #include "../util/string.h"
 #include "function-type.h"
+#include "di-location.h"
 
 typedef llvm::Value* (*BinaryOpFn)(IRBuilderBaseType* builder, llvm::Value*, llvm::Value*, const llvm::Twine&);
 template<BinaryOpFn method>
@@ -146,6 +147,7 @@ NAN_MODULE_INIT(IRBuilderWrapper::Init) {
     Nan::SetPrototypeMethod(functionTemplate, "createZExt", IRBuilderWrapper::ConvertOperation<&llvm::IRBuilder<>::CreateZExt>);
     Nan::SetPrototypeMethod(functionTemplate, "getInsertBlock", IRBuilderWrapper::GetInsertBlock);
     Nan::SetPrototypeMethod(functionTemplate, "setInsertionPoint", IRBuilderWrapper::SetInsertionPoint);
+    Nan::SetPrototypeMethod(functionTemplate, "setCurrentDebugLocation", IRBuilderWrapper::SetCurrentDebugLocation);
 
     auto constructorFunction = Nan::GetFunction(functionTemplate).ToLocalChecked();
     irBuilderConstructor().Reset(constructorFunction);
@@ -829,6 +831,16 @@ NAN_METHOD(IRBuilderWrapper::CreateFNeg) {
 
     auto* neg = IRBuilderWrapper::FromValue(info.Holder())->irBuilder.CreateFNeg(value, name);
     info.GetReturnValue().Set(ValueWrapper::of(neg));
+}
+
+NAN_METHOD(IRBuilderWrapper::SetCurrentDebugLocation) {
+    if (info.Length() != 1 || !DILocationWrapper::isInstance(info[0])) {
+        return Nan::ThrowTypeError("setCurrentDebugLocation should receive an argument: DILocation");
+    }
+
+    auto &irBuilder = IRBuilderWrapper::FromValue(info.Holder())->irBuilder;
+    auto *diLocation = DILocationWrapper::FromValue(info[0])->getDILocation();
+    irBuilder.SetCurrentDebugLocation(diLocation);
 }
 
 llvm::IRBuilder<> &IRBuilderWrapper::getIRBuilder() {
