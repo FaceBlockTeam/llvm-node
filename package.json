@@ -1,6 +1,6 @@
 {
   "name": "@lungchen/llvm-node",
-  "version": "0.0.38",
+  "version": "0.0.39",
   "description": "Node Bindings for LLVM >=13",
   "contributors": [
     "Micha Reiser <micha@famreiser.ch>",

@@ -1,5 +1,6 @@
 #include <nan.h>
 #include <llvm/IR/DebugInfoMetadata.h>
+#include "llvm-context.h"
 #include "di-scope.h"
 #include "di-file.h"
 
@@ -54,6 +55,7 @@ Nan::Persistent<v8::FunctionTemplate> &DIScopeWrapper::diScopeTemplate() {
         Nan::SetPrototypeMethod(localTemplate, "getFilename", DIScopeWrapper::getFilename);
         Nan::SetPrototypeMethod(localTemplate, "getDirectory", DIScopeWrapper::getDirectory);
         Nan::SetPrototypeMethod(localTemplate, "getName", DIScopeWrapper::getName);
+        Nan::SetPrototypeMethod(localTemplate, "getContext", DIScopeWrapper::getContext);
         functionTemplate.Reset(localTemplate);
     }
 
@@ -99,4 +101,14 @@ NAN_METHOD(DIScopeWrapper::getName) {
     auto *diScope = DIScopeWrapper::FromValue(info.Holder())->getDIScope();
     std::string name = diScope->getName().str();
     info.GetReturnValue().Set(Nan::New(name).ToLocalChecked());
+}
+
+NAN_METHOD(DIScopeWrapper::getContext) {
+    if (info.Length() != 0) {
+        return Nan::ThrowTypeError("No argument is required");
+    }
+
+    auto *diScope = DIScopeWrapper::FromValue(info.Holder())->getDIScope();
+    auto &context = diScope->getContext();
+    info.GetReturnValue().Set(LLVMContextWrapper::of(context));
 }

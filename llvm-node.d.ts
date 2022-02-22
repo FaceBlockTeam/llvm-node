@@ -347,6 +347,7 @@ declare namespace llvm {
     getFilename(): string;
     getDirectory(): string;
     getName(): string;
+    getContext(): LLVMContext;
   }
 
   class DINode extends Metadata {

@@ -22,6 +22,7 @@ class DIScopeWrapper: public Nan::ObjectWrap, public FromValueMixin<DIScopeWrapp
         static NAN_METHOD(getFilename);
         static NAN_METHOD(getDirectory);
         static NAN_METHOD(getName);
+        static NAN_METHOD(getContext);
     protected:
         static Nan::Persistent<v8::FunctionTemplate> &diScopeTemplate();
 };
